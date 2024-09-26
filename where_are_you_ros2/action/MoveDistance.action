@@ -1,0 +1,13 @@
+# Goal
+float32 x    # X-coordinate of the target position
+float32 y    # Y-coordinate of the target position
+
+---
+# Result
+float32 actual_x  # Actual X-coordinate reached
+float32 actual_y  # Actual Y-coordinate reached
+
+---
+# Feedback
+float32 current_x  # Current X-coordinate
+float32 current_y  # Current Y-coordinate
