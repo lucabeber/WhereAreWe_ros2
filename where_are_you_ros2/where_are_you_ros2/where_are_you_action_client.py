@@ -24,10 +24,6 @@ def find_P(dist, D_fixed):
     # Compute the eigenvalues and eigenvectors of the Gram matrix
     V, U = np.linalg.eig(G) 
     
-    # Compute the Gram matrix
-    H = np.eye(n) - 1/n * np.ones(n)
-    G = -1/2 * H * D * H
-
     # Extract the eigenvectors corresponding to the eigenvalues different from 0
     U = U[:, V > 1e-6]
     V = np.diag(V[V > 1e-6])

@@ -1,0 +1,928 @@
+---
+title: Localization and Positioning
+author: Luca Beber
+format:
+  revealjs:
+    slide-number: true
+#     width: 1920
+#     height: 1080
+    margin: 0.05
+    embed-resources: true
+    # change transition of the slides
+    transition: slide
+    theme: styles.css
+    # logo: images/IROS-24.png
+#     data-background-image: /images/pro.png
+# title-slide-attributes:
+#   data-background-image: images/drawing.png
+#   data-background-size: contain
+# jupyter: python3
+---
+
+## Approches
+
+::: {.columns}
+::: {.column width="40%"}
+Three main categories:
+
+1. Vision-based
+
+2. Infrared/Lidar-based
+
+3. Radio-based
+:::
+
+::: {.column width="60%"}
+Vision based, like Visual Inertial Navigation suffers low visibility conditions and
+presence of dust or fog.
+
+Radio-Frequency solutions advantages:
+
+- Robust to lights changes, dust and fog
+
+- Low computational cost
+:::
+:::
+## Overview of Positioning Systems
+<br></br>
+<!-- include image -->
+![](figures/positioning_sys.png)
+
+## Positioning Problem Definition
+
+<br></br>
+
+In the analysis, we will consider the following model for the measurement:
+
+$$
+z = h(q) + w,
+$$
+
+where $q \in \mathbb{R}^n$ is in general the position to be found, with $n = 2$ for 2D problems, $z \in \mathbb{R}^m$ is the vector of the $m$ measurements, and $w \in \mathbb{R}^m$ is the vector of the sensor uncertainties.
+
+
+## Display of the positioning problem
+
+```{python}
+# plot a figure displaing 3 ancors and a tag, where each ancor is connected to a tag
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Define the three points
+anchor1 = np.array([1.2, 1])
+anchor2 = np.array([1, 0])
+anchor3 = np.array([0, 1])
+tag = np.array([0.2, 0.3])
+
+# Plot the points
+plt.plot(anchor1[0], anchor1[1], 'bo', label='s 1')
+plt.plot(anchor2[0], anchor2[1], 'bo', label='s 2')
+plt.plot(anchor3[0], anchor3[1], 'bo', label='s 3')
+plt.plot(tag[0], tag[1], 'ro', label='q')
+
+# Connect the points writing over the lines the labels rho_1, rho_2, rho_3
+plt.plot([anchor1[0], tag[0]], [anchor1[1], tag[1]], 'k--')
+plt.plot([anchor2[0], tag[0]], [anchor2[1], tag[1]], 'k--')
+plt.plot([anchor3[0], tag[0]], [anchor3[1], tag[1]], 'k--')
+
+plt.text((anchor1[0] + tag[0] + 0.1) / 2, (anchor1[1] + tag[1]) / 2, r'$\rho_1$', fontsize=12)
+plt.text((anchor2[0] + tag[0] + 0.1) / 2, (anchor2[1] + tag[1] + 0.1) / 2, r'$\rho_2$', fontsize=12)
+plt.text((anchor3[0] + tag[0] + 0.1) / 2, (anchor3[1] + tag[1] + 0.1) / 2, r'$\rho_3$', fontsize=12)
+
+plt.legend()
+plt.grid()
+# Keep the aspect ratio equal
+plt.axis('equal')
+plt.show()
+```
+
+
+## Positioning
+Recalling the model for the measurement:
+
+$$
+b_i = h_i(q) + w_i.
+$$
+
+Saying $w$ to be negligible, the model can be given by:
+
+$$
+h_i(q) = \rho_i = \sqrt{(q - s_i)^T (q - s_i)},
+$$
+
+where $q$ is the position to be found, $s_i$ is the position of the $i$-th anchor, and $\rho_i$ is the distance between the $i$-th anchor and the tag. 
+
+$$
+q = \begin{bmatrix} x \\ y \end{bmatrix}, \quad s_i = \begin{bmatrix} x_i \\ y_i \end{bmatrix}.
+$$
+
+## Positioning
+
+It is now evident that the possible positions of the tag can be geometrically interpreted as a circle. Indeed, we immediately have:
+
+$$
+\rho_i^2 = (x - x_i)^2 + (y - y_i)^2.
+$$
+
+Moreover, with simple algebraic observations, it turns out that at least three base stations are needed.
+
+## Display of the positioning problem
+```{python}
+# display the same figure as the previous slide adding a dotted circle with center in the ancor and radius equal to the distance between the ancor and the tag
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Define the three points
+anchor1 = np.array([1.2, 1])
+anchor2 = np.array([1, 0])
+anchor3 = np.array([0, 1])
+tag = np.array([0.2, 0.3])
+
+# Plot the points
+plt.plot(anchor1[0], anchor1[1], 'bo', label='s 1')
+plt.plot(anchor2[0], anchor2[1], 'bo', label='s 2')
+plt.plot(anchor3[0], anchor3[1], 'bo', label='s 3')
+plt.plot(tag[0], tag[1], 'ro', label='q')
+
+# Connect the points writing over the lines the labels rho_1, rho_2, rho_3
+plt.plot([anchor1[0], tag[0]], [anchor1[1], tag[1]], 'k--')
+plt.plot([anchor2[0], tag[0]], [anchor2[1], tag[1]], 'k--')
+plt.plot([anchor3[0], tag[0]], [anchor3[1], tag[1]], 'k--')
+
+plt.text((anchor1[0] + tag[0] + 0.1) / 2, (anchor1[1] + tag[1]) / 2, r'$\rho_1$', fontsize=12)
+plt.text((anchor2[0] + tag[0] + 0.1) / 2, (anchor2[1] + tag[1] + 0.1) / 2, r'$\rho_2$', fontsize=12)
+plt.text((anchor3[0] + tag[0] + 0.1) / 2, (anchor3[1] + tag[1] + 0.1) / 2, r'$\rho_3$', fontsize=12)
+
+# Plot the circles
+circle1 = plt.Circle(anchor1, np.linalg.norm(anchor1 - tag), color='b', fill=False, linestyle='--')
+circle2 = plt.Circle(anchor2, np.linalg.norm(anchor2 - tag), color='b', fill=False, linestyle='--')
+circle3 = plt.Circle(anchor3, np.linalg.norm(anchor3 - tag), color='b', fill=False, linestyle='--')
+
+plt.gca().add_artist(circle1)
+plt.gca().add_artist(circle2)
+plt.gca().add_artist(circle3)
+
+plt.legend()
+plt.grid()
+# Keep the aspect ratio equal
+plt.axis('equal')
+plt.show()
+```
+
+## Positioning
+
+Since we have $m$ base stations, we have the vectorial representation:
+
+$$
+\mathbf{S}_m = h(q) + \mathbf{w}_m,
+$$
+
+where, as in the previous cases,
+
+$$
+\mathbf{Z}_m =
+\begin{bmatrix}
+z_1 \\
+z_2 \\
+\vdots \\
+z_m
+\end{bmatrix},
+\quad
+h(q) = \rho =
+\begin{bmatrix}
+h_1(q) \\
+h_2(q) \\
+\vdots \\
+h_m(q)
+\end{bmatrix}.
+$$
+
+## Static Estimator
+
+The objective of an estimator is to retrieve the estimate $\hat{q}$ and possibly a measure of its uncertainty. For the ToA approach, static estimators can be:
+
+- **Nonlinear Weighted Least Squares** minimizing:
+
+$$
+J(\hat{q}) = \sum_{i=1}^{m} \frac{(b_i - \sqrt{(\hat{x} - x_i)^2 + (\hat{y} - y_i)^2})^2}{\sigma_i^2};
+$$
+
+- **Maximum Likelihood**, which turns out to be a Nonlinear Weighted Least Squares in the case of Gaussian noises;
+
+- **Least Squares** on a linearized version of the measurements.
+
+
+## Static Estimator
+
+For the latter case, let us consider the squares of the
+measurements:
+
+$$
+b_i^2 = (\hat{x} - x_i)^2 + (\hat{y} - y_i)^2.
+$$
+
+expanding the squares, we have:
+
+$$
+b_i^2 = \hat{x}^2 - 2x_i\hat{x} + x_i^2 + \hat{y}^2 - 2y_i\hat{y} + y_i^2.
+$$
+
+## Static Estimator
+
+By defining $r = x^2 + y^2$, we can rewrite the previous expression as:
+
+$$
+b_i^2 - x_i^2 - y_i^2 - z_i^2 = r - 2xx_i - 2yy_i - 2zz_i + \eta_i.
+$$
+
+By defining:
+
+$$
+\mathbf{B}_m^* =
+\begin{bmatrix}
+b_1^2 - x_1^2 - y_1^2 \\
+b_2^2 - x_2^2 - y_2^2 \\
+\vdots \\
+b_m^2 - x_m^2 - y_m^2 
+\end{bmatrix},
+\quad
+\theta =
+\begin{bmatrix}
+x \\
+y \\
+r
+\end{bmatrix},
+\quad
+H =
+\begin{bmatrix}
+-2x_1 & -2y_1 & 1 \\
+-2x_2 & -2y_2 & 1 \\
+\vdots & \vdots & \vdots \\
+-2x_m & -2y_m & 1
+\end{bmatrix},
+$$
+
+we can rewrite the previous expression as:
+
+$$
+\mathbf{B}_m^* = H\theta + \eta,
+$$
+
+where $\eta = [\eta_1, \eta_2, \ldots, \eta_m]^T$. Hence, the Least Squares solution can be applied.
+
+
+## Static Estimator
+
+Notice that in the previous example both the estimates $\hat{q}$ and $\hat{r}$ are derived. Since $\hat{r} = \hat{q}^T \hat{q}$, this constraint should be enforced and hence **constrained Least Squares** solutions should be applied.
+
+Alternatively, we can get rid of $r$ by computing $b_i^2 - b_j^2$, i.e.,
+
+$$
+b_i^2 - b_j^2 - x_i^2 + x_j^2 - y_i^2 + y_j^2 = -2(x_i - x_j)x - 2(y_i - y_j)y + \eta_i - \eta_j.
+$$
+
+As in the previous case, we can derive the matrix formulation for this problem as well, which, again, requires just the **Least Squares** to be computed.
+
+## Solution using Linear Algebra
+
+Using linear algebra is possible to find the solution of the **Least Square** inverting the matrix $H$
+
+$$ 
+z = \mathbf{H} p \quad \rightarrow \quad p = \mathbf{H}^{-1} z.
+$$
+
+This is true if the matrix $\mathbf{H}$ is square and full rank. If the matrix is rectangular, the pseudo-inverse should be computed instead of the inverse with the Moore-Penrose formula $\mathbf{H}^+ = (\mathbf{H}^T \mathbf{H})^{-1} \mathbf{H}^T$.
+
+Using the trick of the previous slide we can rewrite the matrix $z$ and $H$ for the case with 3 anchors as
+
+$$
+\bar{z} = \begin{bmatrix} z_1^2 - z_2^2 - x_1^2 + x_2^2 - y_1^2 + y_2^2 \\ z_2^2 - z_3^2  - x_2^2 + x_3^2 - y_2^2 + y_3^2 \end{bmatrix}, \quad \bar{\mathbf{H}} = \begin{bmatrix} -2x_1 + 2x_2 & -2y_1 + 2y_2 \\ -2x_2 + 2x_3 & -2y_2 + 2y_3 \end{bmatrix}.
+$$
+
+So the solution can be computed as:
+
+$$ 
+\bar{z} = \bar{\mathbf{H}} p \quad \rightarrow \quad p = \bar{\mathbf{H}}^{-1} \bar{z}.
+$$
+
+## What if the rank of the matrix is not full?
+
+If the matrix is not full rank, the solution is not unique. It can see geometrically that when the anchors are aligned, the matrix is not full rank. In this case, the solution is not unique and the problem is ill-posed.
+
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Define the three points
+anchor1 = np.array([0, 0])
+anchor2 = np.array([0, 1])
+anchor3 = np.array([0, 2])
+tag = np.array([0.5, 0.3])
+
+# Plot the points
+plt.plot(anchor1[0], anchor1[1], 'bo', label='s 1')
+plt.plot(anchor2[0], anchor2[1], 'bo', label='s 2')
+plt.plot(anchor3[0], anchor3[1], 'bo', label='s 3')
+plt.plot(tag[0], tag[1], 'ro', label='q')
+plt.plot(-tag[0], tag[1], 'go', label='q*')
+
+# Connect the points writing over the lines the labels rho_1, rho_2, rho_3
+plt.plot([anchor1[0], tag[0]], [anchor1[1], tag[1]], 'k--')
+plt.plot([anchor2[0], tag[0]], [anchor2[1], tag[1]], 'k--')
+plt.plot([anchor3[0], tag[0]], [anchor3[1], tag[1]], 'k--')
+
+plt.text((anchor1[0] + tag[0] + 0.1) / 2, (anchor1[1] + tag[1]) / 2, r'$\rho_1$', fontsize=12)
+plt.text((anchor2[0] + tag[0] + 0.1) / 2, (anchor2[1] + tag[1] + 0.1) / 2, r'$\rho_2$', fontsize=12)
+plt.text((anchor3[0] + tag[0] + 0.1) / 2, (anchor3[1] + tag[1] + 0.1) / 2, r'$\rho_3$', fontsize=12)
+
+# Plot the circles
+circle1 = plt.Circle(anchor1, np.linalg.norm(anchor1 - tag), color='b', fill=False, linestyle='--')
+circle2 = plt.Circle(anchor2, np.linalg.norm(anchor2 - tag), color='b', fill=False, linestyle='--')
+circle3 = plt.Circle(anchor3, np.linalg.norm(anchor3 - tag), color='b', fill=False, linestyle='--')
+
+plt.gca().add_artist(circle1)
+plt.gca().add_artist(circle2)
+plt.gca().add_artist(circle3)
+
+plt.legend()
+plt.grid()
+# Keep the aspect ratio equal
+plt.axis('equal')
+plt.show()
+```
+
+
+## Time of Arrival (ToA) Approach
+
+We assume that the target node emits a signal at time $t$ that is received by the $i$-th base station at time $t_i$.
+
+The distance $\rho_i$ is then given by:
+
+$$
+\rho_i = (t_i - t)c,
+$$
+
+where $c$ is typically the velocity of light $3 \cdot 10^8$ m/s (e.g., for electromagnetic signals) or the velocity of sound 340 m/s (e.g., for ultrasound systems). From the previous expression, it turns out the necessity of node synchronization, while the quantity $(t_i - t)$ is the Time of Flight (ToF).
+
+## Time of Arrival (ToA) Drawbacks
+
+ToA has some drawbacks:
+
+- Both the target node and the base nodes need to be synchronized.
+- The messages sent should be timestamped.
+- The positions of the base nodes should be known.
+- Suffers from Non-Line-of-Sight (NLOS) conditions.
+
+## Time Difference of Arrival
+
+We introduce now the Time Difference of Arrival (TDoA).
+As for the ToA, the ToA comprises the target node and a set of
+base stations, whose positions are assumed to be known.
+
+TDoA, as ToA, is an active technique and the position is either
+computed by the element being localised or by the base stations.
+Similarly, in coplanar cases, just three base stations are needed,
+otherwise four such nodes are needed.
+
+Basically ToA and TDoA share the same configuration. So, what
+are the differences?
+
+## Time Difference of Arrival (TDoA) Model
+
+Let us again model the TDoA for the UAV case. We consider the position to be determined $q = [x, y, z]^T$ and $s_i = [x_i, y_i, z_i]^T$ the positions of $i = 1, \ldots, m$ base stations. The target node emits a signal at time $t$ that is received by the $i$-th base station at time $t_i$.
+
+The distance $\rho_i$ is again given by:
+
+$$
+\rho_i = (t_i - t)c,
+$$
+
+but now we assume that $t$ is unknown to the base stations. However, considering the difference of times when two base stations receive the message, then:
+
+$$
+t_i - t_j = (t_i - t) - (t_j - t) = \frac{\rho_i}{c} - \frac{\rho_j}{c},
+$$
+
+where $t_i - t_j = \delta_{ji}$ is the measured TDoA.
+
+## Measurement Model
+
+Recalling the measurement model:
+
+$$
+b_{ji} = h_{ji}(q) + w_{ji},
+$$
+
+it is evident that $b_{ji} = \rho_{ji}$, $w_{ji} \sim \mathcal{N}(0, \sigma^2_{ji})$, and the measurement model can be given by:
+
+$$
+h_{ji}(q) = \rho_{ji} = \sqrt{(q - s_i)^T (q - s_i)} - \sqrt{(q - s_j)^T (q - s_j)},
+$$
+
+since $q = [x, y, z]^T$ and $s_i = [x_i, y_i, z_i]^T$ and $s_j = [x_j, y_j, z_j]^T$ are the positions of the $i$-th and $j$-th base stations.
+
+## Geometric Interpretation of TDoA
+
+It is now evident why the TDoA can be geometrically interpreted as the locus of all points \((x, y, z)\) such that the difference of the distances from $s_i$ and $s_j$ is constant and equal to $\rho_{ji}$. Hence, it turns out that at least four base stations are needed for the UAV case.
+
+
+## Advantages and Drawbacks of TDoA
+
+TDoA has the following advantages with respect to ToA:
+
+- Only the base nodes need to be synchronized, i.e., the target node can be unsynchronized.
+- The messages sent are not timestamped.
+
+TDoA still has the following drawbacks:
+
+- The positions of the base nodes should be known.
+- Suffers from Non-Line-of-Sight (NLOS) conditions.
+
+## Ultra-Wideband (UWB) Technology
+
+Ultra-wide band (UWB) refers to the wireless technology that can
+access the frequency spectrum larger than 500 MHz, usually in the
+range 3 to 10 GHz.
+
+UWB has unique advantages, including wall penetration capability,
+low transmission power, simple transceiver structure, and high
+temporal as well as spatial resolutions.
+These features potentially allow centimeter-level positioning
+accuracy with high precision.
+
+We are not going into the details of the solution, what is of
+interest to us are the positioning techniques that can be adopted.
+
+## Ultra-Wideband (UWB) Technology
+
+Usually, UWB is adopted for ToA or TDoA approaches.
+UWB uses two different communication techniques:
+
+• Impulse Radio: transmission of pulses that occupy the entire
+bandwidth.
+
+• Multi-band Orthogonal Frequency Division Multiplexing: the
+spectrum is used to transmit several symbols on several
+sub-bands.
+
+Given the different technique, the algorithm to extract the timing
+information changes, but for our purposes nothing changes.
+
+
+
+# Dynamic Estimator
+
+## Unicycle Model
+
+- The unicycle model represents a mobile robot on a plane.
+- Typical example: differential robot with two lateral wheels.
+- Nonholonomic constraint: movement is only allowed in the direction of the orientation.
+
+## State Coordinates and Control Variables
+When trying to estimate the position of a moving target, the problems become more complex. An additional term should be considered in the model, i.e., the orientation of the target. The new coordinates are $q = [x, y, z, \theta]^T$, where:
+
+- $x, y, z$ are the position of the target.
+- $\theta$ is the orientation of the target.
+
+The control variable of the system are:
+
+- $v$ the velocity of the target.
+- $\omega$ the angular velocity of the target.
+
+The dynamics of the system can be given by:
+
+$$
+\begin{aligned}
+\dot{x} &= v \cos(\theta), \\
+\dot{y} &= v \sin(\theta), \\
+\dot{\theta} &= \omega.
+\end{aligned}
+$$
+
+## Discretizing the Model
+
+To simulate numerically, we discretize with time step $\Delta t$:
+
+$$
+\begin{cases}
+x_{k+1}=x_k+v_k\cos\theta_k\,\Delta t \\
+y_{k+1}=y_k+v_k\sin\theta_k\,\Delta t \\
+\theta_{k+1}=\theta_k+\omega_k\,\Delta t
+\end{cases}
+$$
+
+# Self Localization 
+
+## Self-localization problem
+
+Localization of a master using only ranging information from UWB anchors. 
+
+
+
+
+
+### What are the information available?
+
+- Distance between the master and the anchors
+- Distance between the anchors
+
+---
+
+## 
+
+Given the points
+$$
+N =
+\begin{bmatrix}
+N_0 & \cdots & N_n
+\end{bmatrix}
+=
+\begin{bmatrix}
+x_0 & \cdots & x_n \\
+y_0 & \cdots & y_n
+\end{bmatrix},
+$$
+
+where $N_i$ is the position of the $i$-th anchor. Let us assume that the $i$-th node has access to the distances
+$$
+\rho_{i,j} = \|N_i - N_j\| = \sqrt{(x_i - x_j)^2 + (y_i - y_j)^2},
+$$
+so that the symmetric squared Euclidean distance matrix
+$$
+D =
+\begin{bmatrix}
+0 & \rho^2_{0,1} & \cdots & \rho^2_{0,n} \\
+\rho^2_{1,0} & 0 & \cdots & \rho^2_{1,n} \\
+\vdots & \vdots & \ddots & \vdots \\
+\rho^2_{n,0} & \rho^2_{n,1} & \cdots & 0
+\end{bmatrix},
+$$
+can be built. **This is the matrix that we have access to.**
+
+---
+
+## How do we extract the points form the distances?
+Using the double centering matrix
+$$
+H = I_{n+1} - \frac{1}{n+1} ee^T,
+$$
+where $ee^T = \mathbf{1}_{n+1} \mathbf{1}_{n+1}^T$, $\mathbf{1}_{n+1}$ is a column vector filled with $n+1$ ones and $I_{n+1}$ is the identity matrix of dimension $n+1 \times n+1$, to transform $D$, we obtain the Gram matrix
+
+$$
+G = -\frac{1}{2} HDH.
+$$
+
+This transformation turns pairwise Euclidean distances into pairwise inner products of vectors. 
+
+Let us define $P = 
+\begin{bmatrix}
+p_0 & p_1 & \cdots & p_n
+\end{bmatrix}^T$ as the matrix of node coordinates that generates the symmetric Euclidean matrix D, and that is a replica of $N$ but affected by geometric ambiguities.
+
+
+## Gram Matrix and Its Properties
+
+The Gram matrix $G$ has a special structure: if $G$ is positive semi-definite, it can be decomposed into the product of coordinates (or vectors) that represent the points. Specifically, if $G = P P^T$, where $P$ contains the coordinates of the points we’re trying to find, then $G$ preserves the pairwise distances in the following sense:
+
+$$
+G_{ij} = \langle p_i, p_j \rangle = p_i^T p_j,
+$$
+
+This means that each entry $G_{ij}$ in the Gram matrix corresponds to the inner product of the coordinates of points $p_i$ and $p_j$. Since inner products determine the relative geometry of points, reconstructing $P$ will preserve these distances up to an affine transformation.
+
+---
+
+## Eigen-Decomposition for Coordinate Recovery
+
+
+
+To derive $P$, the following optimization problem needs to be solved:
+$$
+\arg \min_P \| G - P P^T \|^2.
+$$
+The solution to this optimization problem is given by the eigen-decomposition, i.e.
+$$
+P =
+\begin{bmatrix}
+p_0 & \cdots & p_n
+\end{bmatrix}
+=
+\begin{bmatrix}
+\tilde{x}_0 & \cdots & \tilde{x}_n \\
+\tilde{y}_0 & \cdots & \tilde{y}_n
+\end{bmatrix}
+= U \sqrt{V},
+$$
+where $V$ is the diagonal matrix of the eigenvalues, and $U$ is the eigenvector matrix of $G$.
+
+Specifically:
+
+- $G = UVU^T,$ where $U$ is the matrix of eigenvectors and $V$ is the diagonal matrix of eigenvalues. 
+
+- By taking $P = U \sqrt{V},$ we construct coordinates that satisfy $G \approx PP^T,$ meaning that $P$ will reproduce the distances in $D$ up to rotations, reflections, or translations.
+
+---
+
+## Geometric Ambiguity
+
+The resulting points $P$ are not exactly the same as the original points $N$; they are affine transformations of $N$, which means that they could be rotated, reflected, or translated versions of $N$. This is because the Gram matrix $G$ preserves distances, but it does not preserve absolute positioning or orientation in space. However, any two point sets $N$ and $P$ that produce the same $G$ will have identical pairwise distances, which is the key requirement for applications relying on $D$.
+
+More precisely, if there exists an angle $\theta \neq 2k\pi$ with $k \in \mathbb{N}$ such that
+$$
+N =
+\begin{bmatrix}
+\cos \theta & -\sin \theta \\
+\sin \theta & \cos \theta
+\end{bmatrix}
+P = R(\theta) P,
+$$
+then a rotation ambiguity occurs. The flipping problem takes place if
+$$
+N = \pm
+\begin{bmatrix}
+-1 & 0 \\
+0 & 1
+\end{bmatrix}
+P = \pm S P.
+$$
+
+
+
+<!-- ## Matlab code {.smaller}
+```{.matlab code-line-numbers="|1-4|6-12|14-17|19-24|26"}
+N_0 = [0;0];
+N_1 = [6;4];
+N_2 = [1;2];
+N = [N_0, N_1, N_2];
+
+% Build the symmetric squared Euclidean distance matrix
+D = zeros(size(N,2), size(N,2));
+for i = 1:size(N,2)
+    for j = 1:size(N,2)
+        D(i,j) = norm(N(:,i) - N(:,j))^2;
+    end
+end
+
+%% Compute the Gram matrix
+n = size(D,1);
+H = eye(n) - 1/n * ones(n,n);
+G = -1/2 * H * D * H;
+
+% Compute the eigenvalues and eigenvectors of the Gram matrix
+[U, V] = eig(G);
+
+% extract the eigenvectors corresponding to the eigenvalues different from 0
+U = U(:,diag(V) > 1e-6);
+V = V(diag(V) > 1e-6, diag(V) > 1e-6);
+
+P = (U * sqrt(V))'
+```
+--- -->
+
+## Example
+```{python}
+## Write the code of the previous slide in python
+import numpy as np
+import matplotlib.pyplot as plt
+
+N_0 = np.array([0, 0])
+N_1 = np.array([6, 4])
+N_2 = np.array([0, 3])
+N = np.array([N_0, N_1, N_2])
+
+# Build the symmetric squared Euclidean distance matrix
+D = np.zeros((N.shape[0], N.shape[0]))
+for i in range(N.shape[0]):
+    for j in range(N.shape[0]):
+        D[i,j] = np.linalg.norm(N[i] - N[j])**2
+
+n = D.shape[0]
+
+# Compute the Gram matrix
+H = np.eye(n) - (1/n) * np.ones((n, n))
+G = -0.5 * H @ D @ H
+
+# Compute the eigenvalues and eigenvectors of the Gram matrix
+V, U = np.linalg.eig(G) 
+
+# Compute the Gram matrix
+H = np.eye(n) - 1/n * np.ones(n)
+G = -1/2 * H * D * H
+
+# Extract the eigenvectors corresponding to the eigenvalues different from 0
+U = U[:, V > 1e-6]
+V = np.diag(V[V > 1e-6])
+
+# Compute P
+P = (U @ np.sqrt(V))
+
+# print(P)
+# Plot the points contained in the matrix N and in the matrix P
+plt.figure()
+plt.plot(N[:,0], N[:,1], 'ro')
+plt.plot(P[:,0], P[:,1], 'bx')
+plt.axis('equal')
+plt.grid()
+plt.legend(['Original points', 'Estimated points'])
+plt.show()
+```
+
+---
+
+## Return to the self-localization problem
+
+Until now we understood that given the distances is possible to reconstruct the position of the anchors up to a rotation, reflection, or translation. So we want to know if taking more measurements will help to find the relative position of the master with respect to the anchors.
+
+## Illustration of the problem
+Position of the master and two anchors at time $t_1$.
+<!-- Use python to plot three points in the space -->
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Define the three points
+master = np.array([0, 0])
+anchor1 = np.array([1, 1])
+anchor2 = np.array([1, 0])
+
+# Plot the points
+plt.plot(master[0], master[1], 'ro', label='Master t1')
+plt.plot(anchor1[0], anchor1[1], 'bo', label='Anchor 1')
+plt.plot(anchor2[0], anchor2[1], 'bo', label='Anchor 2')
+
+plt.legend()
+plt.grid()
+# Keep the aspect ratio equal
+plt.axis('equal')
+plt.show()
+```
+
+## Illustration of the problem
+Position of the master and two anchors at time $t_2$.
+<!-- Use python to plot three points in the space -->
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Define the three points
+master = np.array([0, 0])
+anchor1 = np.array([1, 1])
+anchor2 = np.array([1, 0])
+master2 = np.array([0, 1])
+
+# Plot the points 
+plt.plot(master[0], master[1], 'ro', label='Master t1')
+plt.plot(anchor1[0], anchor1[1], 'bo', label='Anchor 1')
+plt.plot(anchor2[0], anchor2[1], 'bo', label='Anchor 2')
+plt.plot(master2[0], master2[1], 'ro', label='Master t2')
+plt.grid()
+plt.legend()
+# Keep the aspect ratio equal
+plt.axis('equal')
+# Calculate the direction vector
+direction = master2 - master
+
+# Scale the direction vector to be slightly shorter
+scale_factor = 0.9
+scaled_direction = direction * scale_factor
+
+# Plot the arrow
+plt.arrow(master[0], master[1], scaled_direction[0], scaled_direction[1], head_width=0.05, head_length=0.1, fc='r', ec='r')
+
+plt.show()
+```
+---
+
+
+
+
+## Illustration of the problem
+Position of the master and two anchors at time $t_3$.
+
+<!-- Use python to plot three points in the space -->
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Define the three points
+master = np.array([0, 0])
+anchor1 = np.array([1, 1])
+anchor2 = np.array([1, 0])
+master2 = np.array([0, 1])
+master3 = np.array([-1, 1])
+
+# Plot the points 
+plt.plot(master[0], master[1], 'ro', label='Master t1')
+plt.plot(anchor1[0], anchor1[1], 'bo', label='Anchor 1')
+plt.plot(anchor2[0], anchor2[1], 'bo', label='Anchor 2')
+plt.plot(master2[0], master2[1], 'ro', label='Master t2')
+plt.plot(master3[0], master3[1], 'ro', label='Master t3')
+plt.grid()
+plt.legend()
+# Keep the aspect ratio equal
+plt.axis('equal')
+# Calculate the direction vector
+direction1 = master2 - master
+direction2 = master3 - master2
+
+# Scale the direction vector to be slightly shorter
+scale_factor = 0.9
+scaled_direction1 = direction1 * scale_factor
+scaled_direction2 = direction2 * scale_factor
+
+# Plot the arrow
+plt.arrow(master[0], master[1], scaled_direction[0], scaled_direction[1], head_width=0.05, head_length=0.1, fc='r', ec='r')
+plt.arrow(master2[0], master2[1], scaled_direction2[0], scaled_direction2[1], head_width=0.05, head_length=0.1, fc='r', ec='r')
+plt.show()
+```
+---
+
+
+## Moving Node Setup
+
+Consider three time instants $k$, $k + 1$, and $k + 2$ where the moving node $N_0$:
+
+  - Starts at position $N^k_0$,
+  - Moves to $N^{k+1}_0 = N^k_0 + t_k$, and
+  - Moves to $N^{k+2}_0 = N^{k+1}_0 + t_{k+1}$.
+
+Here, $t_k = \begin{bmatrix} \Delta x_k \\ \Delta y_k \end{bmatrix}$ and $t_{k+1} = \begin{bmatrix} \Delta x_{k+1} \\ \Delta y_{k+1} \end{bmatrix}$ are translation vectors.
+
+---
+
+## Distance Matrix Construction
+
+With measurements $\rho_{i,j} + \eta_{i,j}$ for three consecutive time instants:
+
+  - We build distance matrices $D^k$, $D^{k+1}$, and $D^{k+2}$.
+
+  - Use these distance matrices to compute estimated positions $\hat{P}^k$, $\hat{P}^{k+1}$, and $\hat{P}^{k+2}$ by solving the optimization problem:
+  $$
+  \arg \min_P \| G - P P^T \|^2
+  $$
+
+---
+
+## Alignment with Roto-Translation 
+
+1. **Centering**:
+   - First, center $\hat{P}^k$ on the moving node $0$:
+   $$
+   \hat{P}^k = \hat{P}^k - \hat{p}_{0,k}
+   $$
+
+2. **Roto-Translation Alignment**:
+Align $\hat{P}^{k+1}$ with $\hat{P}^k$ by solving:
+$$
+   \arg \min_{\theta, T} \| \hat{P}^k - \left(R(\theta) \alpha S \hat{P}^{k+1} + T\right) \|
+$$
+Here, $R(\theta)$ represents rotation by $\theta$, and $T$ is the translation vector.
+
+---
+
+## Path Estimation
+
+- After alignment, the estimated translation $T$ provides an approximation of the actual displacement $t_k$ in the opposite direction.
+
+- This alignment can be extended from $\hat{P}^k$ and $\hat{P}^{k+1}$ to the next time step $\hat{P}^{k+2}$, yielding the path of the moving node $N_0$ in its relative frame centered on $\hat{p}_{0,k}$.
+
+---
+
+## Ambiguity in Flipping
+
+- Although alignment provides the positions relative to $N_0$, it does not fully solve the **flipping problem** modeled by $\alpha S$.
+- Due to the ambiguity, the points may appear as reflections across either the x-axis or y-axis.
+
+---
+
+## Theorem: Flipping Ambiguity
+
+**Theorem**: Given a set of $m > 0$ node $0$ motions,
+$$
+N_0^{k+q} = N_0^{k+q-1} + t_{k+q-1}, \quad q = 1, \ldots, m
+$$
+it is impossible to determine $\alpha S$ (flipping operation) if we have no additional knowledge about $t_{k+q-1}$.
+
+---
+
+## Resolving Flipping with Rotation Direction
+
+**Corollary**:
+- By knowing the **sign of angle** $\beta = \arctan \frac{\Delta y_{k+1} - \Delta y_k}{\Delta x_{k+1} - \Delta x_k}$, we can resolve flipping.
+- The angle $\beta$ gives the relative rotation direction of $t_k$ to $t_{k+1}$, indicating whether the movement is clockwise or counterclockwise.
+
+---
+
+## Flipping Resolution: Intuition
+
+- If the moving node $0$ has rotated in a specific direction (e.g., counterclockwise), a flipped solution would imply a contradictory movement (e.g., clockwise).
+- By verifying the sign of $\beta$, we can remove incorrect solutions that do not match the actual direction of movement.
+
+---
+
+## Conclusion
+
+- This method allows localization of the moving node $N_0$ within a relative frame centered on its initial estimated position.
+- By incorporating direction of movement, we can resolve the remaining flipping ambiguity.
+
+---
