@@ -102,14 +102,14 @@ P_k1 = P_k1 - P_k1(:,1)
 P_k2 = P_k2 - P_k2(:,1)
 
 % % Plot P_k and P_k0
-% figure;
-% hold on;   
-% plot(P_k(1,:), P_k(2,:), 'ro');
-% plot(P_k0(1,:), P_k0(2,:), 'bx');
-% hold off;
-% axis equal;
-% grid on;
-% legend('P_k', 'P_k0');
+figure;
+hold on;   
+plot(P_k(1,:), P_k(2,:), 'ro');
+plot(P_k0(1,:), P_k0(2,:), 'bx');
+hold off;
+axis equal;
+grid on;
+legend('P_k', 'P_k0');
 
 %% Minimize the distance between P_k and P_k1
 % We want to find the transformation matrix T that 
@@ -120,36 +120,36 @@ P_k2 = P_k2 - P_k2(:,1)
 % where R(θ) is the rotation matrix and T is the translation matrix
 
 % Define the optimization variables
-% theta = 0;
-% T = [0;0];
-% 
-% % Define the optimization problem
-% S = [1,0;0,1];
-% P_k(:,2:3)
-% P_k1(:,2:3)
-% alpha = 1;
-% fun = @(x) norm(P_k(:,2:3) - ([cos(x(1)),-sin(x(1)); sin(x(1)), cos(x(1))] * alpha * S * P_k1(:,2:3) + [x(2);x(3)]), 'fro');
-% x0 = [theta; T];
-% options = optimoptions('fminunc','Display','iter','Algorithm','quasi-newton');
-% [x, fval] = fminunc(fun, x0, options);
-% 
-% % Compute the rotation matrix and the translation matrix
-% R = [cos(x(1)),-sin(x(1)); sin(x(1)), cos(x(1))] 
-% T = [x(2);x(3)]
-% norm(T)
-% 
-% if abs(norm(T) - norm(t_k)) > 1e-4
-%     S = [-1,0;0,1];
-%     fun = @(x) norm(P_k(:,2:3) - ([cos(x(1)),-sin(x(1)); sin(x(1)), cos(x(1))] * S * P_k1(:,2:3) + [x(2);x(3)]), 'fro');
-%     x0 = [theta; T];
-%     options = optimoptions('fminunc','Display','iter','Algorithm','quasi-newton');
-%     [x, fval] = fminunc(fun, x0, options);
-% end 
-% 
-% % Compute the rotation matrix and the translation matrix
-% R = [cos(x(1)),-sin(x(1)); sin(x(1)), cos(x(1))] 
-% T = [x(2);x(3)]
-% norm(T)
+theta = 0;
+T = [0;0];
+
+% Define the optimization problem
+S = [1,0;0,1];
+P_k(:,2:3)
+P_k1(:,2:3)
+alpha = 1;
+fun = @(x) norm(P_k(:,2:3) - ([cos(x(1)),-sin(x(1)); sin(x(1)), cos(x(1))] * alpha * S * P_k1(:,2:3) + [x(2);x(3)]), 'fro');
+x0 = [theta; T];
+options = optimoptions('fminunc','Display','iter','Algorithm','quasi-newton');
+[x, fval] = fminunc(fun, x0, options);
+
+% Compute the rotation matrix and the translation matrix
+R = [cos(x(1)),-sin(x(1)); sin(x(1)), cos(x(1))] 
+T = [x(2);x(3)]
+norm(T)
+
+if abs(norm(T) - norm(t_k)) > 1e-4
+    S = [-1,0;0,1];
+    fun = @(x) norm(P_k(:,2:3) - ([cos(x(1)),-sin(x(1)); sin(x(1)), cos(x(1))] * S * P_k1(:,2:3) + [x(2);x(3)]), 'fro');
+    x0 = [theta; T];
+    options = optimoptions('fminunc','Display','iter','Algorithm','quasi-newton');
+    [x, fval] = fminunc(fun, x0, options);
+end 
+
+% Compute the rotation matrix and the translation matrix
+R = [cos(x(1)),-sin(x(1)); sin(x(1)), cos(x(1))] 
+T = [x(2);x(3)]
+norm(T)
 
 % Find the tranlation vector from the second point of P_k to the second point of P_k1
 T = P_k(:,2) - P_k1(:,2);
@@ -174,19 +174,19 @@ R = [cos(theta), -sin(theta); sin(theta), cos(theta)];
 P_k1_new = R * P_k1_tmp + (eye(2) - R) * P_k1_tmp(:,2);
 
 % Find the translation between the first point of P_k and the first point of P_k1
-T = P_k1(:,1) - P_k1_new(:,1);
+T = P_k1_new(:,1) - P_k(:,1);
 
 % Check if the translation is equal to t_k, if not mirror the points
 S = [-1,0;0,1];
 if norm(T - t_k) > 1e-6
     alpha = 1;
-    P_k1_new = alpha * S * P_k1;    
-    T = P_k1(:,1) - P_k(:,1);
+    P_k1_new = alpha * S * P_k1_new;    
+    T = P_k1_new(:,1) - P_k(:,1);
 
     if norm(T - t_k) > 1e-6
         alpha = -1;
-        P_k1_new = alpha * S * P_k1;    
-        T = P_k1(:,1) - P_k(:,1);
+        P_k1_new = alpha * S * P_k1_new;    
+        T = P_k1_new(:,1) - P_k(:,1);
     end
 end
     

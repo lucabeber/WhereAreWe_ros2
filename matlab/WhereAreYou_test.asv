@@ -1,4 +1,4 @@
-clear all;
+% clear all;
 clc;
 close all;
 %%
@@ -151,10 +151,16 @@ P_k2 = P_k2 - P_k2(:,1)
 % T = [x(2);x(3)]
 % norm(T)
 
+% Find the tranlation vector from the second point of P_k to the second point of P_k1
+T = P_k(:,2) - P_k1(:,2);
+
+% Translate the points of P_k1
+P_k1_tmp = P_k1 + T;
+
 % Find the rotation matrix between the second and the third point of P_k and P_k1
 % Normalize the vectors
-u = P_k(:,3) - P_k(:,2);
-v = P_k1(:,3) - P_k1(:,2);
+v = P_k(:,3) - P_k(:,2);
+u = P_k1(:,3) - P_k1(:,2);
 u = u / norm(u);
 v = v / norm(v);
 
@@ -164,16 +170,26 @@ theta = atan2(v(2), v(1)) - atan2(u(2), u(1));
 % Construct the rotation matrix
 R = [cos(theta), -sin(theta); sin(theta), cos(theta)];
 
-% Find the tranlation vector from the second point of P_k to the second point of P_k1
-T = P_k(:,2) - P_k1(:,2);
+% Rotate the points of P_k1 around the second point
+P_k1_new = R * P_k1_tmp + (eye(2) - R) * P_k1_tmp(:,2);
 
+% Find the translation between the first point of P_k and the first point of P_k1
+T = P_k1_new(:,1) - P_k(:,1);
 
+% Check if the translation is equal to t_k, if not mirror the points
+S = [-1,0;0,1];
+if norm(T - t_k) > 1e-6
+    alpha = 1;
+    P_k1_new = alpha * S * P_k1;    
+    T = P_k1_new(:,1) - P_k(:,1);
 
-% Find the new position of P_k1
-P_k1_new =  R * (P_k1 + T);
-
-P_k
-P_k1_new
+    if norm(T - t_k) > 1e-6
+        alpha = -1;
+        P_k1_new = alpha * S * P_k1;    
+        T = P_k1(:,1) - P_k(:,1);
+    end
+end
+    
 
 % find the rotazion matrix between vector T and vector t_k
 % Normalize the vectors
@@ -188,6 +204,7 @@ theta = atan2(v(2), v(1)) - atan2(u(2), u(1));
 % Construct the rotation matrix
 R_in = [cos(theta), -sin(theta); sin(theta), cos(theta)];
 P_k = R_in * P_k;
+P_k1_new = R_in * P_k1_new;
 
 % plot the results
 figure;
@@ -197,7 +214,7 @@ hold on;
 % plot(N_k2(1,1), N_k2(2,1), 'ro','MarkerSize',10);
 plot(P_k(1,:), P_k(2,:), 'bo','MarkerSize',10);
 % plot(P_k1(1,:), P_k1(2,:), 'g+','MarkerSize',10);
-P_k1_new =  R_in *( R * alpha * S * P_k1 + T);
+% P_k1_new =  R_in *( R * alpha * S * P_k1 + T);
 plot(P_k1_new(1,:), P_k1_new(2,:), 'k*','MarkerSize',10);
 %plot(R * P_k1 + T, 'kx');
 hold off;
