@@ -37,23 +37,23 @@ V
 P = (U * sqrt(V))';
 
 % Plot the points contained in the matrix N and in the matrix P
-figure;
-hold on;
-plot(N(1,:), N(2,:), 'ro', 'DisplayName', 'Original Points');
-plot(P(1,:), P(2,:), 'bx', 'DisplayName', 'Estimated Points');
-hold off;
-axis equal;
-grid on;
-legend;
-xlabel('X Position');
-ylabel('Y Position');
-title('Original and Estimated Points');
+% figure;
+% hold on;
+% plot(N(1,:), N(2,:), 'ro', 'DisplayName', 'Original Points');
+% plot(P(1,:), P(2,:), 'bx', 'DisplayName', 'Estimated Points');
+% hold off;
+% axis equal;
+% grid on;
+% legend;
+% xlabel('X Position');
+% ylabel('Y Position');
+% title('Original and Estimated Points');
 
 % Define the new node positions at time t and t+1
 N_0_k = [0;0];
-t_k = [-1;1];
+t_k = [-1;0];
 N_0_k1 = N_0_k + t_k;
-t_k1 = [-1;-1];
+t_k1 = [0;-1];
 N_0_k2 = N_0_k1 + t_k1;
 
 % Define the new matrices N_k, N_k1, and N_k2
@@ -123,34 +123,35 @@ if abs(norm(T) - norm(t_k)) > 1e-4
 end 
 
 % Compute the rotation matrix and the translation matrix
-R = [cos(x(1)),-sin(x(1)); sin(x(1)), cos(x(1))];
-T = [x(2);x(3)];
+R = [cos(x(1)),-sin(x(1)); sin(x(1)), cos(x(1))]
+T = [x(2);x(3)]
 norm(T);
 
 % Find the rotation matrix between vector T and vector t_k
 u = T / norm(T);
-v = t_k;
+v = [1;0];
 theta = atan2(v(2), v(1)) - atan2(u(2), u(1));
 
 % Construct the rotation matrix
 R_in = [cos(theta), -sin(theta); sin(theta), cos(theta)];
 P_k = R_in * P_k;
 
-% Plot the results
-figure;
-hold on;
-plot(P_k(1,:), P_k(2,:), 'bo', 'MarkerSize', 10, 'DisplayName', 'P_k');
-P_k1_new =  R_in * (R * alpha * S * P_k1 + T);
-plot(P_k1_new(1,:), P_k1_new(2,:), 'k*', 'MarkerSize', 10, 'DisplayName', 'P_k1_new');
-hold off;
-axis equal;
-grid on;
-legend;
-xlabel('X Position');
-ylabel('Y Position');
-title('Transformed Points P_{k} and P_{k1 new}');
+% % Plot the results
+% figure;
+% hold on;
+% plot(P_k(1,:), P_k(2,:), 'bo', 'MarkerSize', 10, 'DisplayName', 'P_k');
+P_k1_new =  R_in * (R * alpha * S * P_k1 + T)
+% plot(P_k1_new(1,:), P_k1_new(2,:), 'k*', 'MarkerSize', 10, 'DisplayName', 'P_k1_new');
+% hold off;
+% axis equal;
+% grid on;
+% legend;
+% xlabel('X Position');
+% ylabel('Y Position');
+% title('Transformed Points P_{k} and P_{k1 new}');
 
 % Minimize the distance between P_k1 and P_k2
+
 S = [1,0;0,1];
 alpha = 1;
 theta = 0;
@@ -179,60 +180,60 @@ if abs(norm(T-P_k1_new(:,1)) - norm(t_k1)) > 1e-4
     norm(T-P_k1_new(:,1));
 end
 
-% Plot the results
-figure;
-hold on;
-plot(P_k(1,:), P_k(2,:), 'ro', 'MarkerSize', 10, 'DisplayName', 'P_k');
-plot(P_k1_new(1,:), P_k1_new(2,:), 'bx', 'MarkerSize', 10, 'DisplayName', 'P_{k1 new}');
-P_k2_new =  R * alpha * S * P_k2 + T;
-plot(P_k2_new(1,:), P_k2_new(2,:), 'g+', 'MarkerSize', 10, 'DisplayName', 'P_{k2 new}');
-hold off;
-axis equal;
-grid on;
-legend;
-xlabel('X Position');
-ylabel('Y Position');
-title('Transformed Points P_k, P_{k1 new}, and P_{k2 new}');
+% % Plot the results
+% figure;
+% hold on;
+% plot(P_k(1,:), P_k(2,:), 'ro', 'MarkerSize', 10, 'DisplayName', 'P_k');
+% plot(P_k1_new(1,:), P_k1_new(2,:), 'bx', 'MarkerSize', 10, 'DisplayName', 'P_{k1 new}');
+% P_k2_new =  R * alpha * S * P_k2 + T;
+% plot(P_k2_new(1,:), P_k2_new(2,:), 'g+', 'MarkerSize', 10, 'DisplayName', 'P_{k2 new}');
+% hold off;
+% axis equal;
+% grid on;
+% legend;
+% xlabel('X Position');
+% ylabel('Y Position');
+% title('Transformed Points P_k, P_{k1 new}, and P_{k2 new}');
 
-% Mirror the points with respect to the x-axis
-if norm(P_k2_new(:,1)-P_k1_new(:,1)-t_k1) > 1e-6
-    u = t_k / norm(t_k);
-    v = t_k1 / norm(t_k1);
-    theta = atan2(v(2), v(1)) - atan2(u(2), u(1));
-    s = sign(theta);
-    M = [-1,0;0,1];
-else
-    M = eye(2);
-end
+% % Mirror the points with respect to the x-axis
+% if norm(P_k2_new(:,1)-P_k1_new(:,1)-t_k1) > 1e-6
+%     u = t_k / norm(t_k);
+%     v = t_k1 / norm(t_k1);
+%     theta = atan2(v(2), v(1)) - atan2(u(2), u(1));
+%     s = sign(theta);
+%     M = [-1,0;0,1];
+% else
+%     M = eye(2);
+% end
 
-P_k_f = M * P_k;
-P_k1_f = M * P_k1_new;
-P_k2_f = M * P_k2_new;
+% P_k_f = M * P_k;
+% P_k1_f = M * P_k1_new;
+% P_k2_f = M * P_k2_new;
 
-% Plot the mirrored points
-figure;
-hold on;
-plot(P_k_f(1,:), P_k_f(2,:), 'ro', 'MarkerSize', 10, 'DisplayName', 'P_{k f}');
-plot(P_k1_f(1,:), P_k1_f(2,:), 'bx', 'MarkerSize', 10, 'DisplayName', 'P_{k1 f}');
-plot(P_k2_f(1,:), P_k2_f(2,:), 'g+', 'MarkerSize', 10, 'DisplayName', 'P_{k2 f}');
-hold off;
-axis equal;
-grid on;
-legend;
-xlabel('X Position');
-ylabel('Y Position');
-title('Mirrored Points P_{k f}, P_{k1 f}, and P_{k2 f}');
+% % Plot the mirrored points
+% figure;
+% hold on;
+% plot(P_k_f(1,:), P_k_f(2,:), 'ro', 'MarkerSize', 10, 'DisplayName', 'P_{k f}');
+% plot(P_k1_f(1,:), P_k1_f(2,:), 'bx', 'MarkerSize', 10, 'DisplayName', 'P_{k1 f}');
+% plot(P_k2_f(1,:), P_k2_f(2,:), 'g+', 'MarkerSize', 10, 'DisplayName', 'P_{k2 f}');
+% hold off;
+% axis equal;
+% grid on;
+% legend;
+% xlabel('X Position');
+% ylabel('Y Position');
+% title('Mirrored Points P_{k f}, P_{k1 f}, and P_{k2 f}');
 
-% Plot the original points
-figure;
-hold on;
-plot(N_k(1,:), N_k(2,:), 'ro', 'MarkerSize', 10, 'DisplayName', 'N_k');
-plot(N_k1(1,:), N_k1(2,:), 'bx', 'MarkerSize', 10, 'DisplayName', 'N_k1');
-plot(N_k2(1,:), N_k2(2,:), 'g+', 'MarkerSize', 10, 'DisplayName', 'N_k2');
-hold off;
-axis equal;
-grid on;
-legend;
-xlabel('X Position');
-ylabel('Y Position');
-title('Original Points N_k, N_k1, and N_k2');
+% % Plot the original points
+% figure;
+% hold on;
+% plot(N_k(1,:), N_k(2,:), 'ro', 'MarkerSize', 10, 'DisplayName', 'N_k');
+% plot(N_k1(1,:), N_k1(2,:), 'bx', 'MarkerSize', 10, 'DisplayName', 'N_k1');
+% plot(N_k2(1,:), N_k2(2,:), 'g+', 'MarkerSize', 10, 'DisplayName', 'N_k2');
+% hold off;
+% axis equal;
+% grid on;
+% legend;
+% xlabel('X Position');
+% ylabel('Y Position');
+% title('Original Points N_k, N_k1, and N_k2');

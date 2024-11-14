@@ -5,7 +5,7 @@ from rclpy.action import ActionServer
 from rclpy.node import Node
 from geometry_msgs.msg import Twist  # For publishing velocity
 from nav_msgs.msg import Odometry    # For subscribing to /odom
-from where_are_you_ros2.action import MoveDistance  # Import your custom action
+from action_move_interfaces.action import MoveDistance  # Import your custom action
 import math
 
 class MoveDistanceServer(Node):
@@ -43,19 +43,19 @@ class MoveDistanceServer(Node):
 
     def execute_callback(self, goal_handle):
         """Handle goal execution and publish velocity commands."""
-        self.get_logger().info(f'Executing goal to x: {goal_handle.request.x_goal}, y: {goal_handle.request.y_goal}')
+        self.get_logger().info(f'Executing goal to x: {goal_handle.request.x}, y: {goal_handle.request.y}')
         
         # Feedback and result initialization
         feedback_msg = MoveDistance.Feedback()
         result_msg = MoveDistance.Result()
 
-        goal_x = goal_handle.request.x_goal
-        goal_y = goal_handle.request.y_goal
+        goal_x = goal_handle.request.x
+        goal_y = goal_handle.request.y
 
         # Calculate the distance to the goal
         total_distance = self.get_distance_to_goal(goal_x, goal_y)
         linear_speed = 0.5  # Fixed linear speed (m/s)
-        tolerance = 0.1  # Stopping tolerance
+        tolerance = 0.05  # Stopping tolerance
 
         while total_distance > tolerance:
             if goal_handle.is_cancel_requested:
