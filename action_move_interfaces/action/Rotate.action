@@ -1,0 +1,10 @@
+# Goal
+float32 rotation_angle  # Angle to rotate in degrees
+
+---
+# Result
+float32 actual_rotation_angle  # Actual angle rotated in degrees
+
+---
+# Feedback
+float32 current_rotation_angle  # Current angle in degrees

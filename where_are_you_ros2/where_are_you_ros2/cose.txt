@@ -1,0 +1,7 @@
+recursive least square cosa succede incertezza discorso incertezza clock
+cosa succede quando si muove, muove
+kalman filter + filtro di kalman con due antenne
+
+piccola introduzione a ros
+limo dove farlo? chiedere a Luigi per l'accesso 
+
