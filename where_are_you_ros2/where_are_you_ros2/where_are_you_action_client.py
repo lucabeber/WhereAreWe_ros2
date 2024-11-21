@@ -13,17 +13,18 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import tf_transformations
 import os
+import plotly.graph_objects as go
 
 
 
 class WhereAreYou():
     def __init__(self):
         
-        self.anchor_dist = 2
+        self.anchor_dist = 1.0
         # Initialize the matrix of distances between the anchors
-        self.D_fixed = np.array([[0, 0, 0],
-                                [0, 0, self.anchor_dist],
-                                [0, self.anchor_dist, 0]])
+        self.D_fixed = np.array([[.0, .0, .0],
+                                [.0, .0, self.anchor_dist],
+                                [.0, self.anchor_dist, .0]])
         
 
         # Initialize the estimated points P_k, P_k1, and P_k2
@@ -33,41 +34,61 @@ class WhereAreYou():
 
         self.P_relative = np.zeros((2, 3))
 
-                # Initialize the plot
+        # Initialize the plot
         self.fig, self.ax = plt.subplots()
-        self.P_k_f_plot, = self.ax.plot([], [], 'bo', markersize=10, label='P_k')
-        self.P_k1_f_plot, = self.ax.plot([], [], 'k*', markersize=10, label='P_k1_new')
-        self.P_k2_f_plot, = self.ax.plot([], [], 'rs', markersize=10, label='P_k2_new')
-        self.ax.set_xlim(-10, 10)
-        self.ax.set_ylim(-10, 10)
+        self.master, = self.ax.plot([], [], 'bo', markersize=10, label='Master')
+        self.anchor1, = self.ax.plot([], [], 'k*', markersize=10, label='Anchor 1')
+        self.anchor2, = self.ax.plot([], [], 'rs', markersize=10, label='Anchor 2')
+        self.ax.set_xlim(-3, 3)
+        self.ax.set_ylim(-3, 3)
         self.ax.set_aspect('equal')
         self.ax.legend()
         self.ax.grid(True)
 
-        # Start the animation
-        self.ani = animation.FuncAnimation(self.fig, self.animate, init_func=self.init_plot, frames=200, interval=100, blit=True)
-        plt.show(block=False)
+        self.master_x = []
+        self.master_y = []
+        self.anchor1_x = []
+        self.anchor1_y = []
+        self.anchor2_x = []
+        self.anchor2_y = []
+
 
     def init_plot(self):
-        self.P_k_f_plot.set_data([], [])
-        self.P_k1_f_plot.set_data([], [])
-        self.P_k2_f_plot.set_data([], [])
-        return self.P_k_f_plot, self.P_k1_f_plot, self.P_k2_f_plot
 
-    def update_plot(self, P_k_f, P_k1_f, P_k2_f):
-        self.P_k_f_plot.set_data(P_k_f[0, :], P_k_f[1, :])
-        self.P_k1_f_plot.set_data(P_k1_f[0, :], P_k1_f[1, :])
-        self.P_k2_f_plot.set_data(P_k2_f[0, :], P_k2_f[1, :])
+        self.master_x.append(self.P_k_f[0, 0])
+        self.master_y.append(self.P_k_f[1, 0])
+        self.anchor1_x.append(self.P_k_f[0, 1])
+        self.anchor1_y.append(self.P_k_f[1, 1])
+        self.anchor2_x.append(self.P_k_f[0, 2])
+        self.anchor2_y.append(self.P_k_f[1, 2])
+        self.master_x.append(self.P_k1_f[0, 0])
+        self.master_y.append(self.P_k1_f[1, 0])
+        self.master_x.append(self.P_k2_f[0, 0])
+        self.master_y.append(self.P_k2_f[1, 0])
+
+        self.master.set_data(self.master_x, self.master_y)
+        self.anchor1.set_data(self.anchor1_x, self.anchor1_y)
+        self.anchor2.set_data(self.anchor2_x, self.anchor2_y)
+                # Start the animation
+        print("master_x:", self.master_x)
+        print("master_y:", self.master_y)
+        print("anchor1_x:", self.anchor1_x)
+        print("anchor1_y:", self.anchor1_y)
+        print("anchor2_x:", self.anchor2_x)
+        print("anchor2_y:", self.anchor2_y)
+
         plt.draw()
+        print("Init plot")
 
-    def animate(self):
-        # Update the data here
-        P_k_f = self.P_k  # Use actual data
-        P_k1_f = self.P_k1  # Use actual data
-        P_k2_f = self.P_k2  # Use actual data
-        return self.update_plot(P_k_f, P_k1_f, P_k2_f)
 
-    def where_are_you(self, dist_1, dist_2, dist_3):
+    def update_plot(self, master_x_c, master_y_c):
+        self.master_x.append(master_x_c)
+        self.master_y.append(master_y_c)
+        self.master.set_data(self.master_x, self.master_y)
+        plt.draw()
+        plt.show()
+
+    def where_are_you(self, dist_1, dist_2, dist_3, t_k, t_k1):
         # Compute the P matrices for the new matrices
         P_k = self.find_P(dist_1, self.D_fixed)
         P_k1 = self.find_P(dist_2, self.D_fixed)
@@ -78,7 +99,7 @@ class WhereAreYou():
         print("P_k2:\n", P_k2)
 
         # Compute the relative rotation and translation between the matrices
-        R_k, T_k = find_roto_translation(P_k, P_k1, t_k)
+        R_k, T_k = self.find_roto_translation(P_k, P_k1, t_k)
         # Find the rotation matrix between vector T and vector t_k
         u = T_k / np.linalg.norm(T_k)
         v = np.array([1, 0])
@@ -91,15 +112,15 @@ class WhereAreYou():
 
         # Rototranslate the P_k1 in the new frame
         P_k1_new = R_in @ (R_k @ P_k1 + T_k)
-
+        print("P_k1_new:\n", P_k1_new)
         # # Compute the relative rotation and translation between the matrices
-        R_k1, T_k1 = find_roto_translation(P_k1_new, P_k2, t_k1+t_k)
+        R_k1, T_k1 = self.find_roto_translation(P_k1_new, P_k2, t_k1+t_k)
 
         # Rototranslate the P_k2 in the new frame
         P_k2_new = R_k1 @ P_k2 + T_k1
 
         # Mirror 
-        if np.linalg.norm(P_k2_new[:, 0] - P_k1_new[:, 0] - t_k1) > 1e-6:
+        if np.linalg.norm(P_k2_new[:, 0] - P_k1_new[:, 0] + t_k1)  > np.linalg.norm(P_k1_new[:, 0] + t_k1)*0.05:
             u = t_k / np.linalg.norm(t_k)
             v = t_k1 / np.linalg.norm(t_k1)
             theta = np.arctan2(v[1], v[0]) - np.arctan2(u[1], u[0])
@@ -107,20 +128,24 @@ class WhereAreYou():
             M = np.array([[-1, 0], [0, 1]])
         else:
             M = np.eye(2)  
-
+        M = np.eye(2)
         self.P_k_f = M @ P_k
         self.P_k1_f = M @ P_k1_new
         self.P_k2_f = M @ P_k2_new 
+
+        self.init_plot()
+        self.update_plot(4,5)
     
     # Find the P matrix that represents the points in the new frame
     def find_P(self, dist, D_fixed):
         n = len(dist)+1
+        print("dist:", dist)    
         D = np.copy(D_fixed)
         # Complete D_fixied with the first row and column
         for i in range(1,n):
             D[0][i] = dist[i-1]**2
             D[i][0] = dist[i-1]**2
-        
+        print("D:\n", D)
         # Compute the Gram matrix
         H = np.eye(n) - (1/n) * np.ones((n, n))
         G = -0.5 * H @ D @ H
@@ -164,8 +189,9 @@ class WhereAreYou():
                     [np.sin(x[0]),  np.cos(x[0])]]) @ S
         T = np.array([[x[1]],[x[2]]])
         print("Translation Norm:", np.linalg.norm(T))
-
-        if abs(np.linalg.norm(T-P_pre[:,0]) - np.linalg.norm(t_k)) > np.linalg.norm(t_k)*0.05:
+        print("Translation: t_k:", np.linalg.norm(t_k))
+        
+        if abs(np.linalg.norm(T) - np.linalg.norm(t_k)) > np.linalg.norm(t_k)*0.05:
             # Second optimization with reflected S
             S = np.diag([-1, 1])
             result_reflected = minimize(fun, x0, method='BFGS', options=options)
@@ -222,30 +248,45 @@ class MoveDistanceClient(Node):
         # Parameters for the relative localization
         self.ancor_dist = 2
 
+        self.where_are_you = WhereAreYou()
+
+        self.t_k = np.array([0.0,1.0])
+        self.t_k1 = np.array([-1.0,0.0])
+
+        # Angle between the vectors t_k and t_k1
+        u = self.t_k / np.linalg.norm(self.t_k)
+        v = self.t_k1 / np.linalg.norm(self.t_k1)
+        theta = np.arctan2(v[1], v[0]) - np.arctan2(u[1], u[0]) * 180 / np.pi
+        print("Theta:", theta)
+
+
         
 
     def timer_callback(self):
         
         if self.status == 0:
             if self.flag:
+                self.dist_1 = np.array([self.current_dist_1, self.current_dist_2])
                 # self.D_k1 = self.compute_distance_matrix(self.current_dist_1, self.current_dist_2, self.ancor_dist)
-                self.send_goal(1.0, 0.0)
+                self.send_goal(self.t_k[0], self.t_k[1])
                 self.flag = False
         if self.status == 1:
             if self.flag:
-                self.send_rotation(90.0)
+                self.send_rotation(self.theta)
                 self.flag = False
         if self.status == 2:
             if self.flag:
-                self.send_goal(0.0, 1.0)
+                self.dist_2 = np.array([self.current_dist_1, self.current_dist_2])
+                self.send_goal(self.t_k1[0], self.t_k1[1])
                 self.flag = False
                 # os.system('ros2 run ')
         if self.status == 3:
             self.get_logger().info('Both goals successfully reached! Starting relative localization')
             ## relative localization
             if self.flag:
+                self.dist_3 = np.array([self.current_dist_1, self.current_dist_2])
                 self.flag = False
-
+                self.where_are_you.where_are_you(self.dist_1, self.dist_2, self.dist_3, self.t_k, self.t_k1) 
                 # Find the relative position between the anchors and the robot using where are you
                 
                 # Launch node to control the robot with the keyboard
@@ -356,16 +397,18 @@ def main(args=None):
     where_are_you = WhereAreYou()
 
     # # Test the where are you function
-    dist_1 = np.array([0,np.sqrt(2)])
+    dist_1 = np.array([1,np.sqrt(2)])
     dist_2 = np.array([np.sqrt(2),1])
-    dist_3 = np.array([np.sqrt(3),2])
+    dist_3 = np.array([np.sqrt(5),2])
+    t_k = np.array([0.0,1.0])
+    t_k1 = np.array([-1.0,0.0])
 
     # init the plot
     # where_are_you.init_plot()
 
     # Call the where are you function
-    where_are_you.where_are_you(dist_1, dist_2, dist_3) 
-
+    where_are_you.where_are_you(dist_1, dist_2, dist_3, t_k, t_k1) 
+    
     # # Compute the distance matrices for the new matrices
     # D_k = np.zeros((N_k.shape[1], N_k.shape[1]))
     # D_k1 = np.zeros((N_k1.shape[1], N_k1.shape[1]))
@@ -417,7 +460,6 @@ def main(args=None):
     # plt.grid(True)
     # plt.show()
 
-    
 
     rclpy.shutdown()
 

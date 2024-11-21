@@ -4,8 +4,8 @@ close all;
 
 % Define the initial positions of the nodes
 N_0 = [0;0];
-N_1 = [6;4];
-N_2 = [1;2];
+N_1 = [1;0];
+N_2 = [1;1];
 
 % Combine the nodes into a matrix
 N = [N_0, N_1, N_2];
@@ -51,9 +51,9 @@ P = (U * sqrt(V))';
 
 % Define the new node positions at time t and t+1
 N_0_k = [0;0];
-t_k = [-1;0];
+t_k = [0;1];
 N_0_k1 = N_0_k + t_k;
-t_k1 = [0;-1];
+t_k1 = [-1;0];
 N_0_k2 = N_0_k1 + t_k1;
 
 % Define the new matrices N_k, N_k1, and N_k2
@@ -73,7 +73,7 @@ for i = 1:size(N_k,2)
         D_k2(i,j) = norm(N_k2(:,i) - N_k2(:,j))^2;
     end
 end
-
+D,D_k1,D_k2
 % Compute the Gram matrices for the new matrices
 G_k = -1/2 * H * D_k * H;
 G_k1 = -1/2 * H * D_k1 * H;
