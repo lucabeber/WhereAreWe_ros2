@@ -1,0 +1,497 @@
+---
+title: Localization and Positioning Exercitation
+author: Luca Beber
+format:
+  revealjs:
+    slide-number: true
+    # width: 1920
+    # height: 1080
+    margin: 0.15
+    embed-resources: true
+    # change transition of the slides
+    transition: slide
+    theme: styles.css
+---
+
+# Recap Positioning Problem
+
+## Positioning
+Recalling the model for the measurement:
+
+$$
+b_i = h_i(\mathbf{q}) + w_i.
+$$
+
+Assuming $w_i \sim \mathcal{N}(0, \sigma_i^2)$, the model can be given by:
+
+$$
+h_i(\mathbf{q}) = \rho_i = \sqrt{(\mathbf{q} - \mathbf{s}_i)^T (\mathbf{q} - \mathbf{s}_i)},
+$$
+
+where $q$ is the position to be found, $s_i$ is the position of the $i$-th anchor, and $\rho_i$ is the distance between the $i$-th anchor and the tag. 
+
+$$
+\mathbf{q} = \begin{bmatrix} x \\ y \end{bmatrix}, \quad \mathbf{s}_i = \begin{bmatrix} x_i \\ y_i \end{bmatrix}.
+$$
+
+
+
+## Positioning
+
+Since we have $m$ base stations, we have the vectorial representation:
+
+$$
+\mathbf{b}_m = h(q) + \mathbf{w}_m,
+$$
+
+where, as in the previous cases,
+
+$$
+\mathbf{b}_m =
+\begin{bmatrix}
+b_1 \\
+b_2 \\
+\vdots \\
+b_m
+\end{bmatrix},
+\quad
+h(\mathbf{q}) = \rho =
+\begin{bmatrix}
+h_1(\mathbf{q}) \\
+h_2(\mathbf{q}) \\
+\vdots \\
+h_m(\mathbf{q})
+\end{bmatrix}.
+$$
+
+For **range uncertainties** we have:
+
+$$
+\mathbb{E}[\mathbf{w}_m] = \mathbf{0}, \quad \mathbb{C}[\mathbf{w}_m] = \begin{bmatrix}
+\sigma_1^2 & 0 & \cdots & 0 \\
+0 & \sigma_2^2 & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & \sigma_m^2
+\end{bmatrix}.
+$$
+
+## Static Estimator
+
+The objective of an estimator is to retrieve the estimate $\hat{q}$ and possibly a measure of its uncertainty. For the ToA approach, static estimators can be:
+
+- **Nonlinear Weighted Least Squares** minimizing:
+
+$$
+J(\hat{q}) = \sum_{i=1}^{m} \frac{(b_i - \sqrt{(\hat{x} - x_i)^2 + (\hat{y} - y_i)^2})^2}{\sigma_i^2};
+$$
+
+- **Maximum Likelihood**, which turns out to be a Nonlinear Weighted Least Squares in the case of Gaussian noises;
+
+- **Least Squares** on a linearized version of the measurements.
+
+
+## Static Estimator
+
+For the latter case, let us consider the squares of the
+measurements:
+
+$$
+b_i^2 = (\hat{x} - x_i)^2 + (\hat{y} - y_i)^2.
+$$
+
+expanding the squares, we have:
+
+$$
+b_i^2 = \hat{x}^2 - 2x_i\hat{x} + x_i^2 + \hat{y}^2 - 2y_i\hat{y} + y_i^2.
+$$
+
+## Static Estimator
+
+By defining $r = x^2 + y^2$, we can rewrite the previous expression as:
+
+$$
+b_i^2 - x_i^2 - y_i^2 - z_i^2 = r - 2xx_i - 2yy_i - 2zz_i + \eta_i.
+$$
+
+By defining:
+
+$$
+\mathbf{b}_m^* =
+\begin{bmatrix}
+b_1^2 - x_1^2 - y_1^2 \\
+b_2^2 - x_2^2 - y_2^2 \\
+\vdots \\
+b_m^2 - x_m^2 - y_m^2 
+\end{bmatrix},
+\quad
+\boldsymbol{\theta} =
+\begin{bmatrix}
+x \\
+y \\
+r
+\end{bmatrix},
+\quad
+\mathbf{H} =
+\begin{bmatrix}
+-2x_1 & -2y_1 & 1 \\
+-2x_2 & -2y_2 & 1 \\
+\vdots & \vdots & \vdots \\
+-2x_m & -2y_m & 1
+\end{bmatrix},
+$$
+
+we can rewrite the previous expression as:
+
+$$
+\mathbf{b}_m^* = \mathbf{H}\boldsymbol{\theta}.
+$$
+
+## Measurement Uncertainty
+The measurement uncertainty is now not only related to the noise of the measurements but also to the distance between the target and the $i$th anchor. The noise is given by:
+
+$$
+\eta_i = w_i^2 + 2 w_i \rho_i.
+$$
+
+In this case, if we compute the expected value of the noise we see that $\mathbb{E}[\eta_i] = w_i^2$, meaning that a bias is present. However, assuming the noise small enough we have $w_i^2 \approx 0$, the noise is given by $\eta_i = 2 w_i \rho_i$ which yields to $\mathbb{E}[\eta_i]\approx0$.
+
+Note that since the noise is a function of the distance, it can cause problems when the target moves.
+
+## Static Estimator
+
+Notice that in the previous example both the estimates $\mathbf{\hat{q}}$ and $\hat{r}$ are derived. Since $\hat{r} = \mathbf{\hat{q}}^T \mathbf{\hat{q}}$, this constraint should be enforced and hence **constrained Least Squares** solutions should be applied.
+
+Alternatively, we can get rid of $r$ by computing $b_i^2 - b_j^2$, i.e.,
+
+$$
+b_i^2 - b_j^2 - x_i^2 + x_j^2 - y_i^2 + y_j^2 = -2(x_i - x_j)x - 2(y_i - y_j)y + \eta_i - \eta_j.
+$$
+
+As in the previous case, we can derive the matrix formulation for this problem as well, which, again, requires just the **Least Squares** to be computed.
+
+## Solution using Linear Algebra
+
+Using linear algebra is possible to find the solution of the **Least Square** inverting the matrix $H$
+
+$$ 
+\mathbf{b} = \mathbf{H} \mathbf{p} \quad \rightarrow \quad \mathbf{p} = \mathbf{H}^{-1} \mathbf{b}.
+$$
+
+This is true if the matrix $\mathbf{H}$ is square and full rank. If the matrix is rectangular, the pseudo-inverse should be computed instead of the inverse with the Moore-Penrose formula $\mathbf{H}^+ = (\mathbf{H}^T \mathbf{H})^{-1} \mathbf{H}^T$.
+
+Using the trick of the previous slide we can rewrite the matrix $b$ and $H$ for the case with 3 anchors as
+
+$$
+\bar{\mathbf{b}} = \begin{bmatrix} b_1^2 - b_2^2 - x_1^2 + x_2^2 - y_1^2 + y_2^2 \\ b_2^2 - b_3^2  - x_2^2 + x_3^2 - y_2^2 + y_3^2 \end{bmatrix}, \quad \bar{\mathbf{H}} = \begin{bmatrix} -2x_1 + 2x_2 & -2y_1 + 2y_2 \\ -2x_2 + 2x_3 & -2y_2 + 2y_3 \end{bmatrix}.
+$$
+
+So the solution can be computed as:
+
+$$ 
+\bar{\mathbf{b}} = \bar{\mathbf{H}} \mathbf{p} \quad \rightarrow \quad \mathbf{p} = \bar{\mathbf{H}}^{-1} \bar{\mathbf{b}}.
+$$
+
+## Noise Covariance Matrix{.smaller}
+The vector of noises corresponding to the solution presented before is
+
+$$
+\bar{\mathbf{w}}_m = \begin{bmatrix} \eta_2 - \eta_1 \\ \eta_3 - \eta_2 \\ \vdots \\ \eta_m - \eta_{m-1} \end{bmatrix}.
+$$
+
+The uncertainties are
+
+$$
+\mathbb{E}[\bar{\mathbf{w}}_m] = \begin{bmatrix} 0 \\ 0 \\ \vdots \\ 0 \end{bmatrix}, \quad \mathbb{C}[\bar{\mathbf{w}}_m] = \begin{bmatrix} 4\rho_1^2\sigma_1^2 + 4\rho_2^2\sigma_2^2 & -4\rho_2^2\sigma_2^2 & 0 & \cdots & 0 \\ -4\rho_2^2\sigma_2^2 & 4\rho_2^2\sigma_2^2 + 4\rho_3^2\sigma_3^2 & -4\rho_3^2\sigma_3^2 & \cdots & 0 \\ 0 & -4\rho_3^2\sigma_3^2 & 4\rho_3^2\sigma_3^2 + 4\rho_4^2\sigma_4^2 & \cdots & 0 \\ \vdots & \vdots & \vdots & \ddots & \vdots \\ 0 & 0 & 0 & \cdots & 4\rho_{m-1}^2\sigma_{m-1}^2 + 4\rho_m^2\sigma_m^2 \end{bmatrix}.
+$$
+
+## Covariance Matrix of $w_1, w_2, w_3$
+
+### Definitions
+Let:
+
+- $w_1 = - \eta_1 + \eta_2$
+
+- $w_2 = - \eta_2 + \eta_3$
+
+- $w_3 = - \eta_3 + \eta_4$
+
+Assume $\eta_i$ are independent random variables with variances $\sigma_i^2$. 
+
+---
+
+### Variances (Diagonal Elements)
+$$
+\mathrm{Var}(w_1) = \sigma_1^2 + \sigma_2^2
+$$
+$$
+\mathrm{Var}(w_2) = \sigma_2^2 + \sigma_3^2
+$$
+$$
+\mathrm{Var}(w_3) = \sigma_3^2 + \sigma_4^2
+$$
+
+---
+
+### Covariances (Off-Diagonal Elements)
+1. $\mathrm{Cov}(w_1, w_2)$:
+$$
+\mathrm{Cov}(w_1, w_2) = \mathbb{E}[(\eta_2 - \eta_1)(\eta_3 - \eta_2)] = \mathbb{E}[\eta_2\eta_3] - \mathbb{E}[\eta_2^2] - \mathbb{E}[\eta_1\eta_3] +\mathbb{E}[\eta_1\eta_2] = \mathbb{E}[\eta_2^2] =-\sigma_2^2
+$$
+
+2. $\mathrm{Cov}(w_2, w_3)$:
+$$
+\mathrm{Cov}(w_2, w_3) = -\sigma_3^2
+$$
+
+3. $\mathrm{Cov}(w_1, w_3)$:
+$$
+\mathrm{Cov}(w_1, w_3) = 0
+$$
+
+---
+
+### Covariance Matrix
+The covariance matrix $\mathbf{\Sigma}_{\mathbf{w}}$ is:
+$$
+\mathbf{\Sigma}_{\mathbf{w}} =
+\begin{bmatrix}
+    \sigma_1^2 + \sigma_2^2 & -\sigma_2^2 & 0 \\
+    -\sigma_2^2 & \sigma_2^2 + \sigma_3^2 & -\sigma_3^2 \\
+    0 & -\sigma_3^2 & \sigma_3^2 + \sigma_4^2
+\end{bmatrix}.
+$$
+---
+
+### Interpretation
+- Diagonal entries: Variances of $w_1, w_2, w_3$.
+- Off-diagonal entries: Covariances due to shared terms.
+- Non-adjacent $w_i$: Uncorrelated because $\eta_i$ are independent.
+
+# Matlab Implementation 
+
+## Trilateration Function
+As seen previosly the positioning problem can be solved with the linear algebra. We can implement a function that given the positions of the anchors and the distances to the target, it returns the estimated position of the target. Complete the code below where you read $\texttt{TODO}$.
+
+```matlab{.matlab}
+% trilateration function 
+function estimated_position = trilateration(anchors, distances)
+    % Number of anchors
+    n = size(anchors, 1);
+    
+    % Initialize matrices
+    S = zeros(n-1, 2);
+    p = zeros(n-1, 1);
+    
+    % Iterate over all anchors
+    for i = 1:n-1
+        % Fill the matrices
+        % TODO
+    end
+
+    % Compute the estimated position
+    estimated_position = % TODO
+end
+```
+
+## Effect of Noise on the Estimation
+We start seeing which is the effect of the noise on the estimation. In the first part, we will see the effect of the noise on the estimation of the target position. Complete the code below where you read $\texttt{TODO}$.
+
+```matlab{.matlab}
+clear;
+clc;
+
+% Define the positions of the anchors (x, y)
+anchors = [2, 0; 7, 1; 5, 4]; % Example positions for 3 anchors
+n_anchor = size(anchors, 1);
+% Define the true position of the target (not know, the position that 
+% we want to estimate) 
+master_true_position = [4, 2];
+
+% Calculate distances from the target to each anchor
+distances = % TODO
+
+% What happens if we add noise to the distances?
+% We add zero-mean Gaussian noise with standard deviation of 0.1 for 5 times to the distances
+
+% Number of noisy measurements
+n_mes = 5;
+
+% Initialize the noisy distances
+distances_noisy = zeros(n_mes, n_anchor);
+for i = 1:n_mes
+    % Add noise to the distances
+    % TODO
+end
+
+% Compute the estimated position
+estimated_position = zeros(n_mes, 2);
+for i = 1:n_mes
+    % Compute the estimated position using the noisy distances
+    % TODO
+end
+
+% Plot the estimated positions
+figure;
+hold on;
+plot(anchors(:,1), anchors(:,2), 'ro', 'MarkerSize', 10, 'DisplayName', 'Anchors');
+plot(estimated_position(:,1), estimated_position(:,2), 'g+', 'MarkerSize', 10, 'DisplayName', 'Estimated Position');
+plot(master_true_position(1), master_true_position(2), 'bx', 'MarkerSize', 10, 'DisplayName', 'True Position');
+legend;
+xlabel('X Position');
+ylabel('Y Position');
+title('2D Localization with Anchors');
+grid on;
+hold off;
+```
+
+## Effect of the increasing Noise 
+
+Now we will see the effect of the increasing noise on the estimation of the target position. Complete the code below where you read $\texttt{TODO}$. At the end we will compare the estimation with low noise and high noise.
+
+```matlab{.matlab}
+% Let's see what happens if the standard deviation of the noise is increased to 0.5
+
+% Initialize the noisy distances
+distances_noisy_2 = zeros(n_mes, n_anchor);
+for i = 1:n_mes
+    % Add noise to the distances
+    % TODO
+end
+
+% Compute the estimated position
+estimated_position_2 = zeros(n_mes, 2);
+for i = 1:n_mes
+    % Compute the estimated position using the noisy distances
+    % TODO
+end
+
+% Plot the estimated positions
+figure;
+hold on;
+plot(anchors(:,1), anchors(:,2), 'ro', 'MarkerSize', 10, 'DisplayName', 'Anchors');
+plot(estimated_position_2(:,1), estimated_position_2(:,2), 'g+', 'MarkerSize', 10, 'DisplayName', 'Estimated Position');
+plot(master_true_position(1), master_true_position(2), 'bx', 'MarkerSize', 10, 'DisplayName', 'True Position');
+legend;
+xlabel('X Position');
+ylabel('Y Position');
+title('2D Localization with Anchors');
+grid on;
+hold off;
+
+% Now compare the estimated positions with the different noise levels
+figure;
+hold on;
+plot(anchors(:,1), anchors(:,2), 'ro', 'MarkerSize', 10, 'DisplayName', 'Anchors');
+plot(estimated_position(:,1), estimated_position(:,2), 'g+', 'MarkerSize', 10, 'DisplayName', 'Estimated Position (0.1 std)');
+plot(estimated_position_2(:,1), estimated_position_2(:,2), 'b+', 'MarkerSize', 10, 'DisplayName', 'Estimated Position (0.5 std)');
+plot(master_true_position(1), master_true_position(2), 'rx', 'MarkerSize', 10, 'DisplayName', 'True Position');
+legend;
+xlabel('X Position');
+ylabel('Y Position');
+title('2D Localization with Anchors');
+grid on;
+hold off;
+```
+
+## Effect of the Number of Anchors
+
+We will investigate the effect of incresing the number of anchors on the estimation of the target position. Complete the code below where you read $\texttt{TODO}$.
+
+```matlab{.matlab}
+% What happen is the number of anchors increases?
+% Let's add a 3 anchors to the system
+
+% Define the positions of the anchors (x, y)
+anchors_2 = [2, 0; 7, 1; 5, 4; 3, 1; 1, 4; 2, -1; 3, 3]; % Example positions for 4 anchors
+
+n_anchor_2 = size(anchors_2, 1);
+% Define the true position of the target (not know, the position that 
+% we want to estimate) 
+master_true_position = [4, 2];
+
+% Calculate distances from the target to each anchor
+distances_2 = % TODO
+
+% What happens if we add noise to the distances?
+% We add zero-mean Gaussian noise with standard deviation of 0.1 for 5 times to the distances
+
+% Initialize the noisy distances
+distances_noisy_2 = zeros(n_mes, n_anchor_2);
+for i = 1:n_mes
+    % Add noise to the distances
+    % TODO
+end
+
+% Compute the estimated position
+estimated_position_2 = zeros(n_mes, 2);
+for i = 1:n_mes
+  % TODO
+end
+
+% Plot the estimated positions
+figure;
+hold on;
+plot(anchors_2(:,1), anchors_2(:,2), 'co', 'MarkerSize', 10, 'DisplayName', 'Anchors');
+plot(estimated_position(:,1), estimated_position(:,2), 'r.', 'MarkerSize', 5, 'DisplayName', 'Estimated Position 3');
+plot(estimated_position_2(:,1), estimated_position_2(:,2), 'g.', 'MarkerSize', 5, 'DisplayName', 'Estimated Position 6');
+plot(master_true_position(1), master_true_position(2), 'bo', 'MarkerSize', 10, 'DisplayName', 'True Position');
+legend;
+xlabel('X Position');
+ylabel('Y Position');
+title('2D Localization with Anchors');
+grid on;
+hold off;
+
+% Compare the mean square error of the estimated positions 
+mse_3 = % TODO
+mse_6 = % TODO
+
+disp('Mean Square Error for 3 anchors:');
+disp(mse_3);
+
+disp('Mean Square Error for 6 anchors:');
+disp(mse_6);
+```
+
+
+# Dynamic Estimator
+
+## Unicycle Model
+
+- The unicycle model represents a mobile robot on a plane.
+- Typical example: differential robot with two lateral wheels.
+- Nonholonomic constraint: movement is only allowed in the direction of the orientation.
+
+## State Coordinates and Control Variables
+When trying to estimate the position of a moving target, the problems become more complex. An additional term should be considered in the model, i.e., the orientation of the target. The new coordinates are $\mathbf{q} = [x, y, \theta]^T$, where:
+
+- $x, y$ are the position of the target.
+- $\theta$ is the orientation of the target.
+
+The control variable of the system are:
+
+- $v$ the velocity of the target.
+- $\omega$ the angular velocity of the target.
+
+The dynamics of the system can be given by:
+
+$$
+\begin{aligned}
+\dot{x} &= v \cos(\theta), \\
+\dot{y} &= v \sin(\theta), \\
+\dot{\theta} &= \omega.
+\end{aligned}
+$$
+
+## Discretizing the Model
+
+To simulate numerically, we discretize with time step $\Delta t$:
+
+$$
+\begin{cases}
+x_{k+1}=x_k+v_k\cos\theta_k\,\Delta t \\
+y_{k+1}=y_k+v_k\sin\theta_k\,\Delta t \\
+\theta_{k+1}=\theta_k+\omega_k\,\Delta t
+\end{cases}
+$$
+

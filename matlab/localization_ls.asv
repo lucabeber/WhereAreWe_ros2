@@ -1,0 +1,137 @@
+% Recursive Least Hquares for Positioning Problem
+% Master and 3 Anchors
+
+clear;
+clc;
+
+% Define the positions of the anchors (x, y)
+anchors = [2, 0; 7, 1; 5, 4]; % Example positions for 3 anchors
+n_anchor = size(anchors, 1);
+% Define the true position of the target (not know, the position that 
+% we want to estimate) 
+master_true_position = [4, 2];
+
+% Calculate distances from the target to each anchor
+distances = sqrt(sum((anchors - master_true_position).^2, 2));
+
+% What happens if we add noise to the distances?
+% We add zero-mean Gaussian noise with standard deviation of 0.1 for 5 times to the distances
+
+% Number of noisy measurements
+k = 50;
+
+% Initialize the noisy distances
+distances_noisy = zeros(k, n_anchor);
+for i = 1:k
+    distances_noisy(i, :) = distances + 0.1 * randn(n_anchor, 1);
+end
+
+% Compute the problem matrices
+H_k = zeros((n_anchor-1)*k, 2);
+Z_k = zeros((n_anchor-1)*k, 1);
+C_k = eye((n_anchor-1)*k)*0.1^2;
+for i = 1:k
+    j = 2*i -1;
+    [H_k(j:j+1,:),Z_k(j:j+1)] = trilateration(anchors, distances_noisy(i, :));
+end
+
+P_k = (H_k'*C_k^-1*H_k)^-1;
+x_ls = P_k*H_k'*C_k^-1*Z_k;
+
+% Plot the estimated position
+% figure;
+% hold on;
+% plot(anchors(:,1), anchors(:,2), 'ro', 'MarkerSize', 10, 'DisplayName', 'Anchors');
+% plot(x_ls(1), x_ls(2), 'g+', 'MarkerSize', 10, 'DisplayName', 'Estimated Position');
+% plot(master_true_position(1), master_true_position(2), 'bx', 'MarkerSize', 10, 'DisplayName', 'True Position');
+% legend;
+% xlabel('X Position');
+% ylabel('Y Position');
+% title('2D Localization with Anchors');
+% grid on;
+% hold off;
+
+% Recursive Least Squares
+% New measurements
+distances_noisy_2 = distances + 0.1 * randn(n_anchor, 1);
+
+% x_new = x_ls + P_k*H_new'*((H_new*P_k*H_new' + 0.1^2)^-1)*(distances_noisy_2 - H_new*x_ls);
+[H,z] = trilateration(anchors, distances_noisy_2);
+Z_new = [Z_k; z];
+H_new = [H_k; H];
+C_new = eye((n_anchor-1)*(k+1))*0.1^2;
+x_new = recursive_wls(x_ls, P_k, Z_new, H_new, C_new);
+
+x_ls, P_k, Z_new, H_new, C_new
+% Now we simulate the recursive least squares from the first measurement
+% Initialize the noisy distances
+distances_noisy = zeros(k, n_anchor);
+for i = 1:k
+    distances_noisy(i, :) = distances + 0.5 * randn(n_anchor, 1);
+end
+
+% Compute the problem matrices
+[H,z] = trilateration(anchors, distances_noisy_2);
+
+C = eye((n_anchor-1))*0.5^2;
+
+P = (H'*C^-1*H)^-1;
+x_ls = P*H'*C^-1*z;
+
+% Plot the estimated position
+figure;
+hold on;
+plot(anchors(:,1), anchors(:,2), 'ro', 'MarkerSize', 10, 'DisplayName', 'Anchors');
+plot(x_ls(1), x_ls(2), 'g+', 'MarkerSize', 10, 'DisplayName', 'Estimated Position');
+plot(master_true_position(1), master_true_position(2), 'bx', 'MarkerSize', 10, 'DisplayName', 'True Position');
+legend;
+xlabel('X Position');
+ylabel('Y Position');
+title('2D Localization with Anchors with IWSL');
+grid on;
+hold off;
+ 
+x_values = zeros(k, 2);
+x_values(1,:) = x_ls;
+P_values = P;
+
+%%
+for i = 2:k
+    [H_k,z_k] = trilateration(anchors, distances_noisy(i, :));
+    C = eye((n_anchor-1)*i)*0.5^2;
+    Z_k = [z;z_k];
+    x_values(i-1,:)', P, z, H, C
+    [x_values(i,:),P] = recursive_wls(x_values(i-1,:)', P, Z_new, H_new, C);
+    plot(x_values(i,1), x_values(i,2), 'g+', 'MarkerSize', 10);
+    drawnow; 
+    pause(0.1); 
+end
+
+
+
+
+
+% Iterative solution for the recursive least squares
+function [x_k_1, P_k_1] = recursive_wls(x_k, P_k, z_k_1, H_k_1, C_new)
+    S_k_1 = H_k_1*P_k*H_k_1' + C_new;   % Covariance of the residuals
+    W_k_1 = P_k*H_k_1'*S_k_1^-1;        % Update gain
+    x_k_1 = x_k + W_k_1*(z_k_1 - H_k_1*x_k);
+    P_k_1 = (eye(size(P_k)) - W_k_1*H_k_1)*P_k;
+end
+
+% trilateration function 
+function [H,z] = trilateration(anchors, distances)
+    % Number of anchors
+    n = size(anchors, 1);
+    
+    % Initialize matrices
+    H = zeros(n-1, 2);
+    z = zeros(n-1, 1);
+    
+    % Iterate over all anchors
+    for i = 1:n-1
+        % Fill the matrices
+        H(i, :) = 2*[anchors(i+1, 1) - anchors(i, 1), anchors(i+1, 2) - anchors(i, 2)];
+        z(i) = - distances(i+1)^2  + distances(i)^2 + anchors(i+1, 1)^2 - anchors(i, 1)^2 + anchors(i+1, 2)^2 - anchors(i, 2)^2;
+    end
+end
