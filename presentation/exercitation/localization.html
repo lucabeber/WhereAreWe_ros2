@@ -1265,7 +1265,7 @@ h_m(\mathbf{q})
 \]</span></p>
 <p>For <strong>range uncertainties</strong> we have:</p>
 <p><span class="math display">\[
-\mathbb{E}[\mathbf{w}_m] = \mathbf{0}, \quad \mathbb{C}[\mathbf{w}_m] = \begin{bmatrix}
+\mathbb{E}[\mathbf{w}_m] = \mathbf{0}, \quad \mathbb{C}ov[\mathbf{w}_m] = \begin{bmatrix}
 \sigma_1^2 &amp; 0 &amp; \cdots &amp; 0 \\
 0 &amp; \sigma_2^2 &amp; \cdots &amp; 0 \\
 \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
@@ -1302,7 +1302,7 @@ b_i^2 = \hat{x}^2 - 2x_i\hat{x} + x_i^2 + \hat{y}^2 - 2y_i\hat{y} + y_i^2.
 <h2>Static Estimator</h2>
 <p>By defining <span class="math inline">\(r = x^2 + y^2\)</span>, we can rewrite the previous expression as:</p>
 <p><span class="math display">\[
-b_i^2 - x_i^2 - y_i^2 - z_i^2 = r - 2xx_i - 2yy_i - 2zz_i + \eta_i.
+b_i^2 - x_i^2 - y_i^2 = r - 2xx_i - 2yy_i + \eta_i.
 \]</span></p>
 <p>By defining:</p>
 <p><span class="math display">\[
@@ -1376,7 +1376,7 @@ b_i^2 - b_j^2 - x_i^2 + x_j^2 - y_i^2 + y_j^2 = -2(x_i - x_j)x - 2(y_i - y_j)y +
 \]</span></p>
 <p>The uncertainties are</p>
 <p><span class="math display">\[
-\mathbb{E}[\bar{\mathbf{w}}_m] = \begin{bmatrix} 0 \\ 0 \\ \vdots \\ 0 \end{bmatrix}, \quad \mathbb{C}[\bar{\mathbf{w}}_m] = \begin{bmatrix} 4\rho_1^2\sigma_1^2 + 4\rho_2^2\sigma_2^2 &amp; -4\rho_2^2\sigma_2^2 &amp; 0 &amp; \cdots &amp; 0 \\ -4\rho_2^2\sigma_2^2 &amp; 4\rho_2^2\sigma_2^2 + 4\rho_3^2\sigma_3^2 &amp; -4\rho_3^2\sigma_3^2 &amp; \cdots &amp; 0 \\ 0 &amp; -4\rho_3^2\sigma_3^2 &amp; 4\rho_3^2\sigma_3^2 + 4\rho_4^2\sigma_4^2 &amp; \cdots &amp; 0 \\ \vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\ 0 &amp; 0 &amp; 0 &amp; \cdots &amp; 4\rho_{m-1}^2\sigma_{m-1}^2 + 4\rho_m^2\sigma_m^2 \end{bmatrix}.
+\mathbb{E}[\bar{\mathbf{w}}_m] = \begin{bmatrix} 0 \\ 0 \\ \vdots \\ 0 \end{bmatrix}, \quad \mathbb{C}ov[\bar{\mathbf{w}}_m] = \begin{bmatrix} 4\rho_1^2\sigma_1^2 + 4\rho_2^2\sigma_2^2 &amp; -4\rho_2^2\sigma_2^2 &amp; 0 &amp; \cdots &amp; 0 \\ -4\rho_2^2\sigma_2^2 &amp; 4\rho_2^2\sigma_2^2 + 4\rho_3^2\sigma_3^2 &amp; -4\rho_3^2\sigma_3^2 &amp; \cdots &amp; 0 \\ 0 &amp; -4\rho_3^2\sigma_3^2 &amp; 4\rho_3^2\sigma_3^2 + 4\rho_4^2\sigma_4^2 &amp; \cdots &amp; 0 \\ \vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\ 0 &amp; 0 &amp; 0 &amp; \cdots &amp; 4\rho_{m-1}^2\sigma_{m-1}^2 + 4\rho_m^2\sigma_m^2 \end{bmatrix}.
 \]</span></p>
 </section>
 <section id="covariance-matrix-of-w_1-w_2-w_3" class="slide level2">
@@ -1617,6 +1617,219 @@ b_i^2 - b_j^2 - x_i^2 + x_j^2 - y_i^2 + y_j^2 = -2(x_i - x_j)x - 2(y_i - y_j)y +
 <span id="cb4-53"><a href></a><span class="va">disp</span>(<span class="va">mse_6</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section></section>
 <section>
+<section id="recursive-least-squares" class="title-slide slide level1 center">
+<h1>Recursive Least Squares</h1>
+
+</section>
+<section id="least-squares-algorithm" class="slide level2">
+<h2>Least Squares Algorithm</h2>
+<p>Let’s define again the measurement model for multiple measurements:</p>
+<p><span class="math display">\[
+\mathbf{z}(i) = \mathbf{H}(i) \mathbf{x} + \boldsymbol{\varepsilon}(i), \quad i = 1, 2, \ldots, k
+\]</span></p>
+<p>is the time varying set of the measurements collected at time <span class="math inline">\(i\)</span>. The following aggregating vectors are</p>
+<p><span class="math display">\[
+\mathbf{Z}^k = \begin{bmatrix} \mathbf{z}(1) \\ \mathbf{z}(2) \\ \ldots \\ \mathbf{z}(k) \end{bmatrix}, \quad \mathbf{H}^k = \begin{bmatrix} \mathbf{H}(1) \\ \mathbf{H}(2) \\ \ldots \\ \mathbf{H}(k) \end{bmatrix}, \quad \boldsymbol{\varepsilon} = \begin{bmatrix} \boldsymbol{\varepsilon}(1) \\ \boldsymbol{\varepsilon}(2) \\ \ldots \\ \boldsymbol{\varepsilon}(k) \end{bmatrix}.
+\]</span></p>
+<p>The covariance matrix</p>
+<p><span class="math display">\[
+\mathbb{C}ov[\boldsymbol{\varepsilon}] = \begin{bmatrix} \mathbb{C}ov[\boldsymbol{\varepsilon}(1)] &amp; 0 &amp; \ldots &amp; 0 \\ 0 &amp; \mathbb{C}ov[\boldsymbol{\varepsilon}(2)] &amp; \ldots &amp; 0 \\ \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\ 0 &amp; 0 &amp; \ldots &amp; \mathbb{C}ov[\boldsymbol{\varepsilon}(k)] \end{bmatrix}.
+\]</span></p>
+</section>
+<section id="least-squares-algorithm-1" class="slide level2">
+<h2>Least Squares Algorithm</h2>
+<p>The estimation error is given by</p>
+<p><span class="math display">\[
+\mathbf{e}^k = \mathbf{x} - \hat{\mathbf{x}}^{LS}.
+\]</span></p>
+<p>The estimated position <span class="math inline">\(\hat{\mathbf{x}}^{LS}\)</span> is given by the solution of the following</p>
+<p><span class="math display">\[
+\hat{\mathbf{x}}^{LS} = (\mathbf{H}^{k^T} \mathbf{C}^{k^{-1}} \mathbf{H}^k)^{-1} \mathbf{H}^{k^T} \mathbf{C}^{k^{-1}} \mathbf{Z}^k = \mathbf{P}(k) \mathbf{H}^{k^T} \mathbf{C}^{k^{-1}} \mathbf{Z}^k.
+\]</span></p>
+</section>
+<section id="new-measurements" class="slide level2">
+<h2>New Measurements</h2>
+<p>At time <span class="math inline">\(k+1\)</span>, new measurements are collected and the new matrices are</p>
+<p><span class="math display">\[
+\mathbf{Z}^{k+1} = \begin{bmatrix} \mathbf{Z}^k \\ \mathbf{z}(k+1) \end{bmatrix}, \quad \mathbf{H}^{k+1} = \begin{bmatrix} \mathbf{H}^k \\ \mathbf{H}(k+1) \end{bmatrix}, \quad \boldsymbol{\varepsilon}^{k+1} = \begin{bmatrix} \boldsymbol{\varepsilon}^k \\ \boldsymbol{\varepsilon}(k+1) \end{bmatrix}.
+\]</span></p>
+<p>The covariance matrix is updated as</p>
+<p><span class="math display">\[
+\mathbb{C}ov[\boldsymbol{\varepsilon}^{k+1}] = \begin{bmatrix} \mathbb{C}ov[\boldsymbol{\varepsilon}^k] &amp; 0 \\ 0 &amp; \mathbb{C}ov[\boldsymbol{\varepsilon}(k+1)] \end{bmatrix}.
+\]</span></p>
+<p>This problem will explode in terms of computational complexity as the number of measurements increases. For this reason, the <strong>Recursive Least Squares</strong> algorithm is used.</p>
+</section>
+<section id="recursive-least-squares-algorithm" class="slide level2">
+<h2>Recursive Least Squares Algorithm</h2>
+<p>The recoursive solution is given by</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf{S}(k+1) &amp;= \mathbf{H}(k+1) \mathbf{P}(k) \mathbf{H}(k+1)^T + \mathbb{C}ov[\boldsymbol{\varepsilon}(k+1)], \\
+\mathbf{W}(k+1) &amp;= \mathbf{P}(k) \mathbf{H}(k+1)^T \mathbf{S}(k+1)^{-1}, \\
+\hat{\mathbf{x}}^{RLS}(k+1) &amp;= \hat{\mathbf{x}}^{RLS}(k) + \mathbf{W}(k+1) (\mathbf{z}(k+1) - \mathbf{H}(k+1) \hat{\mathbf{x}}^{RLS}(k)), \\
+\mathbf{P}(k+1) &amp;=  (\mathbf{I} - \mathbf{W}(k+1) \mathbf{H}(k+1)) \mathbf{P}(k).
+\end{aligned}
+\]</span></p>
+</section></section>
+<section>
+<section id="matlab-implementation-1" class="title-slide slide level1 center">
+<h1>Matlab Implementation</h1>
+
+</section>
+<section id="least-squares-algorithm-2" class="slide level2">
+<h2>Least Squares Algorithm</h2>
+<p>We need to modify the trilateration function implemented before to construct also the covariance matrix. Complete the code below where you read <span class="math inline">\(\texttt{TODO}\)</span>.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource matlab number-lines code-with-copy"><code class="sourceCode matlab"><span id="cb5-1"><a href></a><span class="co">% trilateration function </span></span>
+<span id="cb5-2"><a href></a><span class="kw">function</span> [<span class="va">H</span><span class="op">,</span><span class="va">z</span><span class="op">,</span><span class="va">C</span>] <span class="op">=</span> <span class="va">trilateration</span>(<span class="va">anchors</span><span class="op">,</span> <span class="va">distances</span><span class="op">,</span> <span class="va">noise_std</span>)</span>
+<span id="cb5-3"><a href></a>    <span class="co">% Number of anchors</span></span>
+<span id="cb5-4"><a href></a>    <span class="va">n</span> <span class="op">=</span> <span class="va">size</span>(<span class="va">anchors</span><span class="op">,</span> <span class="fl">1</span>)<span class="op">;</span></span>
+<span id="cb5-5"><a href></a>    </span>
+<span id="cb5-6"><a href></a>    <span class="co">% Initialize matrices</span></span>
+<span id="cb5-7"><a href></a>    <span class="va">H</span> <span class="op">=</span> <span class="va">zeros</span>(<span class="va">n</span><span class="op">-</span><span class="fl">1</span><span class="op">,</span> <span class="fl">2</span>)<span class="op">;</span></span>
+<span id="cb5-8"><a href></a>    <span class="va">z</span> <span class="op">=</span> <span class="va">zeros</span>(<span class="va">n</span><span class="op">-</span><span class="fl">1</span><span class="op">,</span> <span class="fl">1</span>)<span class="op">;</span></span>
+<span id="cb5-9"><a href></a>    <span class="va">C</span> <span class="op">=</span> <span class="va">zeros</span>(<span class="va">n</span><span class="op">-</span><span class="fl">1</span>)<span class="op">;</span></span>
+<span id="cb5-10"><a href></a>    </span>
+<span id="cb5-11"><a href></a>    <span class="co">% Iterate over all anchors</span></span>
+<span id="cb5-12"><a href></a>    <span class="kw">for</span> <span class="va">i</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="va">n</span><span class="op">-</span><span class="fl">1</span></span>
+<span id="cb5-13"><a href></a>        <span class="co">% Fill the matrices</span></span>
+<span id="cb5-14"><a href></a>        <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb5-15"><a href></a>        <span class="co">% Fill the covariance matrix</span></span>
+<span id="cb5-16"><a href></a>        <span class="kw">if</span> <span class="va">i</span> <span class="op">==</span> <span class="fl">1</span></span>
+<span id="cb5-17"><a href></a>            <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb5-18"><a href></a>        <span class="kw">elseif</span> <span class="va">i</span> <span class="op">&lt;</span> <span class="va">n</span><span class="op">-</span><span class="fl">1</span></span>
+<span id="cb5-19"><a href></a>            <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb5-20"><a href></a>        <span class="kw">else</span></span>
+<span id="cb5-21"><a href></a>            <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb5-22"><a href></a>        <span class="kw">end</span></span>
+<span id="cb5-23"><a href></a>    <span class="kw">end</span></span>
+<span id="cb5-24"><a href></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="least-squares-algorithm-3" class="slide level2">
+<h2>Least Squares Algorithm</h2>
+<p>Now we can implement the recursive least squares algorithm. Complete the code below where you read <span class="math inline">\(\texttt{TODO}\)</span>.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource matlab number-lines code-with-copy"><code class="sourceCode matlab"><span id="cb6-1"><a href></a><span class="va">clear</span><span class="op">;</span></span>
+<span id="cb6-2"><a href></a><span class="va">clc</span><span class="op">;</span></span>
+<span id="cb6-3"><a href></a></span>
+<span id="cb6-4"><a href></a><span class="co">% Define the positions of the anchors (x, y)</span></span>
+<span id="cb6-5"><a href></a><span class="va">anchors</span> <span class="op">=</span> [<span class="fl">2</span><span class="op">,</span> <span class="fl">0</span><span class="op">;</span> <span class="fl">7</span><span class="op">,</span> <span class="fl">1</span><span class="op">;</span> <span class="fl">5</span><span class="op">,</span> <span class="fl">4</span>]<span class="op">;</span> <span class="co">% Example positions for 3 anchors</span></span>
+<span id="cb6-6"><a href></a><span class="va">n_anchor</span> <span class="op">=</span> <span class="va">size</span>(<span class="va">anchors</span><span class="op">,</span> <span class="fl">1</span>)<span class="op">;</span></span>
+<span id="cb6-7"><a href></a><span class="co">% Define the true position of the target (not know, the position that </span></span>
+<span id="cb6-8"><a href></a><span class="co">% we want to estimate) </span></span>
+<span id="cb6-9"><a href></a><span class="va">master_true_position</span> <span class="op">=</span> [<span class="fl">4</span><span class="op">,</span> <span class="fl">2</span>]<span class="op">;</span></span>
+<span id="cb6-10"><a href></a></span>
+<span id="cb6-11"><a href></a><span class="co">% Calculate distances from the target to each anchor</span></span>
+<span id="cb6-12"><a href></a><span class="va">distances</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb6-13"><a href></a></span>
+<span id="cb6-14"><a href></a><span class="co">% What happens if we add noise to the distances?</span></span>
+<span id="cb6-15"><a href></a><span class="co">% We add zero-mean Gaussian noise with standard deviation of 0.1 for 5 times to the distances</span></span>
+<span id="cb6-16"><a href></a></span>
+<span id="cb6-17"><a href></a><span class="co">% Number of noisy measurements</span></span>
+<span id="cb6-18"><a href></a><span class="va">k</span> <span class="op">=</span> <span class="fl">100</span><span class="op">;</span></span>
+<span id="cb6-19"><a href></a></span>
+<span id="cb6-20"><a href></a><span class="co">% Initialize the noisy distances</span></span>
+<span id="cb6-21"><a href></a><span class="va">distances_noisy</span> <span class="op">=</span> <span class="va">zeros</span>(<span class="va">k</span><span class="op">,</span> <span class="va">n_anchor</span>)<span class="op">;</span></span>
+<span id="cb6-22"><a href></a></span>
+<span id="cb6-23"><a href></a><span class="kw">for</span> <span class="va">i</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="va">k</span></span>
+<span id="cb6-24"><a href></a>    <span class="va">distances_noisy</span>(<span class="va">i</span><span class="op">,</span> <span class="op">:</span>) <span class="op">=</span> <span class="va">distances</span> <span class="op">+</span> <span class="fl">0.1</span> <span class="op">*</span> <span class="va">randn</span>(<span class="va">n_anchor</span><span class="op">,</span> <span class="fl">1</span>)<span class="op">;</span></span>
+<span id="cb6-25"><a href></a><span class="kw">end</span></span>
+<span id="cb6-26"><a href></a></span>
+<span id="cb6-27"><a href></a><span class="co">% Compute the problem matrices</span></span>
+<span id="cb6-28"><a href></a><span class="va">H_k</span> <span class="op">=</span> <span class="va">zeros</span>((<span class="va">n_anchor</span><span class="op">-</span><span class="fl">1</span>)<span class="op">*</span><span class="va">k</span><span class="op">,</span> <span class="fl">2</span>)<span class="op">;</span></span>
+<span id="cb6-29"><a href></a><span class="va">Z_k</span> <span class="op">=</span> <span class="va">zeros</span>((<span class="va">n_anchor</span><span class="op">-</span><span class="fl">1</span>)<span class="op">*</span><span class="va">k</span><span class="op">,</span> <span class="fl">1</span>)<span class="op">;</span></span>
+<span id="cb6-30"><a href></a><span class="va">C_k</span> <span class="op">=</span> <span class="va">zeros</span>((<span class="va">n_anchor</span><span class="op">-</span><span class="fl">1</span>)<span class="op">*</span><span class="va">k</span>)<span class="op">;</span></span>
+<span id="cb6-31"><a href></a></span>
+<span id="cb6-32"><a href></a><span class="kw">for</span> <span class="va">i</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="va">k</span></span>
+<span id="cb6-33"><a href></a>    <span class="va">j</span> <span class="op">=</span> <span class="fl">2</span><span class="op">*</span><span class="va">i</span> <span class="op">-</span><span class="fl">1</span><span class="op">;</span></span>
+<span id="cb6-34"><a href></a>    <span class="va">l</span> <span class="op">=</span> <span class="fl">1</span> <span class="op">+</span> (<span class="va">i</span><span class="op">-</span><span class="fl">1</span>)<span class="op">*</span>(<span class="va">n_anchor</span> <span class="op">-</span> <span class="fl">1</span>)<span class="op">;</span></span>
+<span id="cb6-35"><a href></a>    <span class="co">% </span><span class="al">TODO</span><span class="co"> = trilateration(...);</span></span>
+<span id="cb6-36"><a href></a><span class="kw">end</span></span>
+<span id="cb6-37"><a href></a></span>
+<span id="cb6-38"><a href></a></span>
+<span id="cb6-39"><a href></a><span class="va">P_k</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb6-40"><a href></a><span class="va">x_ls</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb6-41"><a href></a></span>
+<span id="cb6-42"><a href></a><span class="co">% Plot the estimated position</span></span>
+<span id="cb6-43"><a href></a><span class="va">figure</span><span class="op">;</span></span>
+<span id="cb6-44"><a href></a><span class="va">hold</span> <span class="va">on</span><span class="op">;</span></span>
+<span id="cb6-45"><a href></a><span class="va">plot</span>(<span class="va">anchors</span>(<span class="op">:,</span><span class="fl">1</span>)<span class="op">,</span> <span class="va">anchors</span>(<span class="op">:,</span><span class="fl">2</span>)<span class="op">,</span> <span class="ss">&#39;ro&#39;</span><span class="op">,</span> <span class="ss">&#39;MarkerSize&#39;</span><span class="op">,</span> <span class="fl">10</span><span class="op">,</span> <span class="ss">&#39;DisplayName&#39;</span><span class="op">,</span> <span class="ss">&#39;Anchors&#39;</span>)<span class="op">;</span></span>
+<span id="cb6-46"><a href></a><span class="va">plot</span>(<span class="va">x_ls</span>(<span class="fl">1</span>)<span class="op">,</span> <span class="va">x_ls</span>(<span class="fl">2</span>)<span class="op">,</span> <span class="ss">&#39;g+&#39;</span><span class="op">,</span> <span class="ss">&#39;MarkerSize&#39;</span><span class="op">,</span> <span class="fl">10</span><span class="op">,</span> <span class="ss">&#39;DisplayName&#39;</span><span class="op">,</span> <span class="ss">&#39;Estimated Position&#39;</span>)<span class="op">;</span></span>
+<span id="cb6-47"><a href></a><span class="va">plot</span>(<span class="va">master_true_position</span>(<span class="fl">1</span>)<span class="op">,</span> <span class="va">master_true_position</span>(<span class="fl">2</span>)<span class="op">,</span> <span class="ss">&#39;bx&#39;</span><span class="op">,</span> <span class="ss">&#39;MarkerSize&#39;</span><span class="op">,</span> <span class="fl">10</span><span class="op">,</span> <span class="ss">&#39;DisplayName&#39;</span><span class="op">,</span> <span class="ss">&#39;True Position&#39;</span>)<span class="op">;</span></span>
+<span id="cb6-48"><a href></a><span class="va">legend</span><span class="op">;</span></span>
+<span id="cb6-49"><a href></a><span class="va">xlabel</span>(<span class="ss">&#39;X Position&#39;</span>)<span class="op">;</span></span>
+<span id="cb6-50"><a href></a><span class="va">ylabel</span>(<span class="ss">&#39;Y Position&#39;</span>)<span class="op">;</span></span>
+<span id="cb6-51"><a href></a><span class="va">title</span>(<span class="ss">&#39;2D Localization with Anchors&#39;</span>)<span class="op">;</span></span>
+<span id="cb6-52"><a href></a><span class="va">grid</span> <span class="va">on</span><span class="op">;</span></span>
+<span id="cb6-53"><a href></a><span class="va">hold</span> <span class="va">off</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="recursive-least-squares-algorithm-1" class="slide level2">
+<h2>Recursive Least Squares Algorithm</h2>
+<p>Implement the recursive least squares function. Complete the code below where you read <span class="math inline">\(\texttt{TODO}\)</span>.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource matlab number-lines code-with-copy"><code class="sourceCode matlab"><span id="cb7-1"><a href></a><span class="co">% Iterative solution for the recursive least squares</span></span>
+<span id="cb7-2"><a href></a><span class="kw">function</span> [<span class="va">x_k_1</span><span class="op">,</span> <span class="va">P_k_1</span>] <span class="op">=</span> <span class="va">recursive_wls</span>(<span class="va">x_k</span><span class="op">,</span> <span class="va">P_k</span><span class="op">,</span> <span class="va">z_k_1</span><span class="op">,</span> <span class="va">H_k_1</span><span class="op">,</span> <span class="va">C_new</span>)</span>
+<span id="cb7-3"><a href></a>    <span class="va">S_k_1</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb7-4"><a href></a>    <span class="va">W_k_1</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb7-5"><a href></a>    <span class="va">x_k_1</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb7-6"><a href></a>    <span class="va">P_k_1</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb7-7"><a href></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="least-squares-algorithm-4" class="slide level2">
+<h2>Least Squares Algorithm</h2>
+<p>We see how to add a new measurement to the least squares algorithm. Complete the code below where you read <span class="math inline">\(\texttt{TODO}\)</span>.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource matlab number-lines code-with-copy"><code class="sourceCode matlab"><span id="cb8-1"><a href></a><span class="co">% New measurements</span></span>
+<span id="cb8-2"><a href></a><span class="va">distances_noisy_2</span> <span class="op">=</span> <span class="va">distances</span> <span class="op">+</span> <span class="fl">0.1</span> <span class="op">*</span> <span class="va">randn</span>(<span class="va">n_anchor</span><span class="op">,</span> <span class="fl">1</span>)<span class="op">;</span></span>
+<span id="cb8-3"><a href></a></span>
+<span id="cb8-4"><a href></a><span class="co">% Compute the problem matrices</span></span>
+<span id="cb8-5"><a href></a><span class="co">% </span><span class="al">TODO</span><span class="co"> = trilateration(...);</span></span>
+<span id="cb8-6"><a href></a><span class="va">Z_new</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb8-7"><a href></a><span class="va">H_new</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb8-8"><a href></a><span class="va">C_new</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb8-9"><a href></a><span class="va">x_new</span> <span class="op">=</span> <span class="va">recursive_wls</span>()<span class="op">;</span></span>
+<span id="cb8-10"><a href></a></span>
+<span id="cb8-11"><a href></a><span class="co">% Now we simulate the recursive least squares from the first measurement</span></span>
+<span id="cb8-12"><a href></a><span class="co">% Initialize the noisy distances</span></span>
+<span id="cb8-13"><a href></a><span class="va">distances_noisy</span> <span class="op">=</span> <span class="va">zeros</span>(<span class="va">k</span><span class="op">,</span> <span class="va">n_anchor</span>)<span class="op">;</span></span>
+<span id="cb8-14"><a href></a><span class="va">std_dev</span> <span class="op">=</span> <span class="fl">0.5</span><span class="op">;</span></span>
+<span id="cb8-15"><a href></a><span class="kw">for</span> <span class="va">i</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="va">k</span></span>
+<span id="cb8-16"><a href></a>    <span class="va">distances_noisy</span>(<span class="va">i</span><span class="op">,</span> <span class="op">:</span>) <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb8-17"><a href></a><span class="kw">end</span></span>
+<span id="cb8-18"><a href></a></span>
+<span id="cb8-19"><a href></a><span class="co">% Compute the problem matrices</span></span>
+<span id="cb8-20"><a href></a><span class="co">% </span><span class="al">TODO</span><span class="co"> = trilateration(...);</span></span>
+<span id="cb8-21"><a href></a></span>
+<span id="cb8-22"><a href></a><span class="va">P</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span><span class="co">;</span></span>
+<span id="cb8-23"><a href></a><span class="va">x_ls</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span><span class="co">;</span></span>
+<span id="cb8-24"><a href></a></span>
+<span id="cb8-25"><a href></a><span class="co">% Plot the estimated position</span></span>
+<span id="cb8-26"><a href></a><span class="va">figure</span><span class="op">;</span></span>
+<span id="cb8-27"><a href></a><span class="va">hold</span> <span class="va">on</span><span class="op">;</span></span>
+<span id="cb8-28"><a href></a><span class="va">plot</span>(<span class="va">anchors</span>(<span class="op">:,</span><span class="fl">1</span>)<span class="op">,</span> <span class="va">anchors</span>(<span class="op">:,</span><span class="fl">2</span>)<span class="op">,</span> <span class="ss">&#39;ro&#39;</span><span class="op">,</span> <span class="ss">&#39;MarkerSize&#39;</span><span class="op">,</span> <span class="fl">10</span><span class="op">,</span> <span class="ss">&#39;DisplayName&#39;</span><span class="op">,</span> <span class="ss">&#39;Anchors&#39;</span>)<span class="op">;</span></span>
+<span id="cb8-29"><a href></a><span class="va">plot</span>(<span class="va">x_ls</span>(<span class="fl">1</span>)<span class="op">,</span> <span class="va">x_ls</span>(<span class="fl">2</span>)<span class="op">,</span> <span class="ss">&#39;g+&#39;</span><span class="op">,</span> <span class="ss">&#39;MarkerSize&#39;</span><span class="op">,</span> <span class="fl">10</span><span class="op">,</span> <span class="ss">&#39;DisplayName&#39;</span><span class="op">,</span> <span class="ss">&#39;Estimated Position&#39;</span>)<span class="op">;</span></span>
+<span id="cb8-30"><a href></a><span class="va">plot</span>(<span class="va">master_true_position</span>(<span class="fl">1</span>)<span class="op">,</span> <span class="va">master_true_position</span>(<span class="fl">2</span>)<span class="op">,</span> <span class="ss">&#39;bx&#39;</span><span class="op">,</span> <span class="ss">&#39;MarkerSize&#39;</span><span class="op">,</span> <span class="fl">10</span><span class="op">,</span> <span class="ss">&#39;DisplayName&#39;</span><span class="op">,</span> <span class="ss">&#39;True Position&#39;</span>)<span class="op">;</span></span>
+<span id="cb8-31"><a href></a><span class="va">legend</span><span class="op">;</span></span>
+<span id="cb8-32"><a href></a><span class="va">xlabel</span>(<span class="ss">&#39;X Position&#39;</span>)<span class="op">;</span></span>
+<span id="cb8-33"><a href></a><span class="va">ylabel</span>(<span class="ss">&#39;Y Position&#39;</span>)<span class="op">;</span></span>
+<span id="cb8-34"><a href></a><span class="va">xlim</span>([<span class="fl">3.8</span><span class="op">,</span> <span class="fl">4.2</span>])<span class="op">;</span></span>
+<span id="cb8-35"><a href></a><span class="va">ylim</span>([<span class="fl">1.8</span><span class="op">,</span> <span class="fl">2.2</span>])<span class="op">;</span></span>
+<span id="cb8-36"><a href></a><span class="va">title</span>(<span class="ss">&#39;2D Localization with Anchors with IWSL&#39;</span>)<span class="op">;</span></span>
+<span id="cb8-37"><a href></a><span class="va">grid</span> <span class="va">on</span><span class="op">;</span></span>
+<span id="cb8-38"><a href></a></span>
+<span id="cb8-39"><a href></a><span class="va">x_values</span> <span class="op">=</span> <span class="va">zeros</span>(<span class="va">k</span><span class="op">,</span> <span class="fl">2</span>)<span class="op">;</span></span>
+<span id="cb8-40"><a href></a><span class="va">x_values</span>(<span class="fl">1</span><span class="op">,:</span>) <span class="op">=</span> <span class="va">x_ls</span><span class="op">;</span></span>
+<span id="cb8-41"><a href></a><span class="va">P_values</span> <span class="op">=</span> <span class="va">P</span><span class="op">;</span></span>
+<span id="cb8-42"><a href></a></span>
+<span id="cb8-43"><a href></a><span class="kw">for</span> <span class="va">i</span> <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="va">k</span></span>
+<span id="cb8-44"><a href></a>    <span class="co">% </span><span class="al">TODO</span><span class="co"> = trilateration();</span></span>
+<span id="cb8-45"><a href></a>    [] <span class="op">=</span> <span class="va">recursive_wls</span>()<span class="op">;</span></span>
+<span id="cb8-46"><a href></a>    <span class="va">plot</span>(<span class="va">x_values</span>(<span class="va">i</span><span class="op">,</span><span class="fl">1</span>)<span class="op">,</span> <span class="va">x_values</span>(<span class="va">i</span><span class="op">,</span><span class="fl">2</span>)<span class="op">,</span> <span class="ss">&#39;g+&#39;</span><span class="op">,</span> <span class="ss">&#39;MarkerSize&#39;</span><span class="op">,</span> <span class="fl">10</span><span class="op">,</span><span class="ss">&#39;HandleVisibility&#39;</span><span class="op">,</span><span class="ss">&#39;off&#39;</span>)<span class="op">;</span></span>
+<span id="cb8-47"><a href></a>    <span class="va">drawnow</span><span class="op">;</span> </span>
+<span id="cb8-48"><a href></a>    <span class="va">pause</span>(<span class="fl">0.1</span>)<span class="op">;</span> </span>
+<span id="cb8-49"><a href></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="moving-object-with-recursive-least-squares" class="slide level2">
+<h2>Moving object with Recursive Least Squares</h2>
+<p>We will see the effect of the moving target on the estimation of the target position. The system dynamic is given by <span class="math inline">\(\boldsymbol{x}_{k+1} = \boldsymbol{A} \boldsymbol{x}_k\)</span> where <span class="math inline">\(\boldsymbol{A} = \begin{bmatrix} 1 &amp; 0 \\ 0 &amp; 1 \end{bmatrix}\)</span>.</p>
+</section></section>
+<section>
 <section id="dynamic-estimator" class="title-slide slide level1 center">
 <h1>Dynamic Estimator</h1>
 
@@ -1660,6 +1873,57 @@ y_{k+1}=y_k+v_k\sin\theta_k\,\Delta t \\
 \theta_{k+1}=\theta_k+\omega_k\,\Delta t
 \end{cases}
 \]</span></p>
+<p>It is easy to see that the model is nonlinear. For this reason, the Extended Kalman Filter (EKF) is used.</p>
+</section>
+<section id="measurement-model" class="slide level2">
+<h2>Measurement Model</h2>
+<p>As in the previous cases, the measurements are the distances from the target to the anchors. The model to estimate the current <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> is the same linearized model as before. It is possible to use it without any modification,</p>
+<p><span class="math display">\[
+\mathbf{z}_{k+1} = \mathbf{H}_{k+1} \mathbf{x}_{k+1} + \boldsymbol{\varepsilon}_{k+1},
+\]</span></p>
+</section>
+<section id="extended-kalman-filter" class="slide level2">
+<h2>Extended Kalman Filter</h2>
+<p>Since the model is nonlinear, the Extended Kalman Filter (EKF) is used. The EKF is a recursive estimator that uses a linear approximation of the model to estimate the state of the system. The EKF is composed of two steps:</p>
+<ol type="1">
+<li><p><strong>Prediction</strong>: the state of the system is predicted using the model.</p></li>
+<li><p><strong>Correction</strong>: the predicted state is corrected using the measurements.</p></li>
+</ol>
+</section>
+<section id="prediction-step" class="slide level2">
+<h2>Prediction Step</h2>
+<p>The prediction step is written as</p>
+<p><span class="math display">\[
+\begin{aligned}
+\hat{\mathbf{x}}_{k+1}^- &amp;= f_k(\hat{\mathbf{x}}, \mathbf{u}_k), \\
+\mathbf{P}_{k+1}^- &amp;= \mathbf{A}_k \mathbf{P}_k \mathbf{A}_k^T + \mathbf{G} \mathbf{Q}_k \mathbf{G}^T,
+\end{aligned}
+\]</span></p>
+<p>where <span class="math inline">\(\mathbf{A}_k\)</span> is the Jacobian of the model, <span class="math inline">\(\mathbf{G}\)</span> is the Jacobian of the noise, and <span class="math inline">\(\mathbf{Q}_k\)</span> is the covariance matrix of the noise. The Jacobians are given by</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf{A}_k &amp;= \frac{f_k(\mathbf{x},\mathbf{u},\mathbf{v})}{d\mathbf{x}}, \\
+\mathbf{G} &amp;= \frac{f_k(\mathbf{x},\mathbf{u},\mathbf{v})}{d\mathbf{v}},
+\end{aligned}
+\]</span></p>
+<p>computed for <span class="math inline">\(\mathbf{x} = \hat{\mathbf{x}}_k\)</span>, <span class="math inline">\(\mathbf{u}=\mathbf{u}_k\)</span> and <span class="math inline">\(\mathbf{v} = \mathbf{0}\)</span>.</p>
+</section>
+<section id="correction-step" class="slide level2">
+<h2>Correction Step</h2>
+<p>The correction step is written as</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf{S}_{k+1} &amp;= \mathbf{H}_{k+1} \mathbf{P}_{k+1}^- \mathbf{H}_{k+1}^T + \mathbf{R}_{k+1}, \\
+\mathbf{K}_{k+1} &amp;= \mathbf{P}_{k+1}^- \mathbf{H}_{k+1}^T \mathbf{S}_{k+1}^{-1}, \\
+\hat{\mathbf{x}}_{k+1} &amp;= \hat{\mathbf{x}}_{k+1}^- + \mathbf{K}_{k+1} (\mathbf{z}_{k+1} - h_{k+1}(\hat{\mathbf{x}}_{k+1}^-)), \\
+\mathbf{P}_{k+1} &amp;= (\mathbf{I} - \mathbf{K}_{k+1} \mathbf{H}_{k+1}) \mathbf{P}_{k+1}^-.
+\end{aligned}
+\]</span></p>
+<p>The Jacobian <span class="math inline">\(\mathbf{H}_{k+1}\)</span> is given by</p>
+<p><span class="math display">\[
+\mathbf{H}_{k+1} = \frac{h_{k+1}(\mathbf{x})}{d\mathbf{x}},
+\]</span></p>
+<p>computed for <span class="math inline">\(\mathbf{x} = \hat{\mathbf{x}}_{k+1}^-\)</span> and <span class="math inline">\(\boldsymbol{\varepsilon} = \boldsymbol{0}\)</span>.</p>
 <div class="quarto-auto-generated-content">
 <div class="footer footer-default">
 

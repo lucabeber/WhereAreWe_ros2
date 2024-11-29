@@ -80,8 +80,8 @@ hold off;
 figure;
 hold on;
 plot(anchors(:,1), anchors(:,2), 'ro', 'MarkerSize', 10, 'DisplayName', 'Anchors');
-plot(estimated_position(:,1), estimated_position(:,2), 'g+', 'MarkerSize', 10, 'DisplayName', 'Estimated Position (0.1 std)');
 plot(estimated_position_2(:,1), estimated_position_2(:,2), 'b+', 'MarkerSize', 10, 'DisplayName', 'Estimated Position (0.5 std)');
+plot(estimated_position(:,1), estimated_position(:,2), 'g+', 'MarkerSize', 10, 'DisplayName', 'Estimated Position (0.1 std)');
 plot(master_true_position(1), master_true_position(2), 'rx', 'MarkerSize', 10, 'DisplayName', 'True Position');
 legend;
 xlabel('X Position');
@@ -138,8 +138,8 @@ grid on;
 hold off;
 
 % Compare the mean square error of the estimated positions 
-mse_3 = mean(sum((estimated_position - repmat(master_true_position, n_mes, 1)).^2, 2));
-mse_6 = mean(sum((estimated_position_2 - repmat(master_true_position, n_mes, 1)).^2, 2));
+mse_3 = mean(sum((estimated_position - master_true_position).^2, 2));
+mse_6 = mean(sum((estimated_position_2 - master_true_position).^2, 2));
 
 disp('Mean Square Error for 3 anchors:');
 disp(mse_3);
@@ -161,9 +161,10 @@ function estimated_position = trilateration(anchors, distances)
     for i = 1:n-1
         % Fill the matrices
         S(i, :) = 2*[anchors(i+1, 1) - anchors(i, 1), anchors(i+1, 2) - anchors(i, 2)];
-        p(i) = - distances(i+1)^2  + distances(i)^2 + anchors(i+1, 1)^2 - anchors(i, 1)^2 + anchors(i+1, 2)^2 - anchors(i, 2)^2;
+        p(i) = - distances(i+1)^2  + distances(i)^2 + anchors(i+1, 1)^2 - anchors(i, 1)^2 ... 
+        + anchors(i+1, 2)^2 - anchors(i, 2)^2;
     end
 
-    estimated_position = (S' * S)^-1 * S' * p;
+    estimated_position = (S' * S)^-1 * S' * p; % S\p
 end
 

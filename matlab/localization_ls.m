@@ -1,11 +1,11 @@
 % Recursive Least Hquares for Positioning Problem
 % Master and 3 Anchors
-
+close all;
 clear;
 clc;
 
 % Define the positions of the anchors (x, y)
-anchors = [2, 0; 7, 1; 5, 4]; % Example positions for 3 anchors
+anchors = [2, 0; 7, 1; 5, 4; 1, 4]; % Example positions for 3 anchors
 n_anchor = size(anchors, 1);
 % Define the true position of the target (not know, the position that 
 % we want to estimate) 
@@ -32,15 +32,9 @@ H_k = zeros((n_anchor-1)*k, 2);
 Z_k = zeros((n_anchor-1)*k, 1);
 C_k = zeros((n_anchor-1)*k);
 
-% for i = 1:k
-%     for j = 1:n_anchor-1
-        
-    
-% end
 for i = 1:k
-    j = 2*i -1;
     l = 1 + (i-1)*(n_anchor - 1);
-    [H_k(j:j+1,:),Z_k(j:j+1), C_k(l:l+n_anchor-2,l:l+n_anchor-2)] = trilateration(anchors, distances_noisy(i, :), 0.1);
+    [H_k(l:l+n_anchor-2,:),Z_k(l:l+n_anchor-2), C_k(l:l+n_anchor-2,l:l+n_anchor-2)] = trilateration(anchors, distances_noisy(i, :), 0.1);
 end
 
 
@@ -74,7 +68,7 @@ x_new = recursive_wls(x_ls, P_k, Z_new, H_new, C_new);
 % Now we simulate the recursive least squares from the first measurement
 % Initialize the noisy distances
 distances_noisy = zeros(k, n_anchor);
-std_dev = 0.5;
+std_dev = 0.1;
 for i = 1:k
     distances_noisy(i, :) = distances + std_dev * randn(n_anchor, 1);
 end
@@ -89,7 +83,7 @@ x_ls = P*H'*C^-1*z;
 figure;
 hold on;
 plot(anchors(:,1), anchors(:,2), 'ro', 'MarkerSize', 10, 'DisplayName', 'Anchors');
-plot(x_ls(1), x_ls(2), 'g+', 'MarkerSize', 10, 'DisplayName', 'Estimated Position');
+estimated_pos = plot(x_ls(1), x_ls(2), 'g+', 'MarkerSize', 10, 'DisplayName', 'Estimated Position');
 plot(master_true_position(1), master_true_position(2), 'bx', 'MarkerSize', 10, 'DisplayName', 'True Position');
 legend;
 xlabel('X Position');
@@ -98,22 +92,19 @@ xlim([3.8, 4.2]);
 ylim([1.8, 2.2]);
 title('2D Localization with Anchors with IWSL');
 grid on;
- 
+
 x_values = zeros(k, 2);
 x_values(1,:) = x_ls;
 P_values = P;
 
-
-
-%%
 for i = 2:k
     [H_k,z_k,C] = trilateration(anchors, distances_noisy(i, :), std_dev);
-    C
-    % Z_new = [z;z_k];
-    % H_new = [H;H_k];
     [x_values(i,:),P] = recursive_wls(x_values(i-1,:)', P, z_k, H_k, C);
-    plot(x_values(i,1), x_values(i,2), 'g+', 'MarkerSize', 10,'HandleVisibility','off');
+    % Update the plot
+    set(estimated_pos, 'XData', x_values(1:i,1), 'YData', x_values(1:i,2));
+    % plot(x_values(i,1), x_values(i,2), 'g+', 'MarkerSize', 10,'HandleVisibility','off');
     drawnow; 
+    hold off;
     pause(0.1); 
 end
 
@@ -199,6 +190,7 @@ function [H,z,C] = trilateration(anchors, distances, noise_std)
         % Fill the matrices
         H(i, :) = 2*[anchors(i+1, 1) - anchors(i, 1), anchors(i+1, 2) - anchors(i, 2)];
         z(i) = - distances(i+1)^2  + distances(i)^2 + anchors(i+1, 1)^2 - anchors(i, 1)^2 + anchors(i+1, 2)^2 - anchors(i, 2)^2;
+        % Fill the covariance matrix
         if i == 1
             C(i,i) = 4 * noise_std^2 * (distances(i+1)^2 + distances(i)^2);
             C(i,i+1) = -4 * noise_std^2 * distances(i+1)^2;
