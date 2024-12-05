@@ -67,7 +67,7 @@ class MoveDistanceServer(Node):
 
     def odom_callback(self, msg):
         """Update current position from /odom topic."""
-        if msg.child_frame_id == 'base_link':
+        if msg.child_frame_id == 'base_footprint':
             self.current_x = msg.pose.pose.position.x
             self.current_y = msg.pose.pose.position.y
             # Convert quaternion to Euler angles
@@ -76,7 +76,7 @@ class MoveDistanceServer(Node):
             (_, _, yaw) = tf_transformations.euler_from_quaternion(orientation_list)
             self.current_angle = yaw
             # print(f"Current angle: {self.current_angle}")
-            # print(f"Current position: x:{self.current_x} | y:{self.current_y}")
+            # self.get_logger().info(f"Current position: x:{self.current_x} | y:{self.current_y}")
 
     def execute_callback(self, goal_handle):
         """Handle goal execution and publish velocity commands."""
@@ -94,7 +94,7 @@ class MoveDistanceServer(Node):
 
         # Calculate the distance to the goal
         total_distance = self.get_distance_to_goal(goal_x, goal_y)
-        linear_speed = 0.5  # Fixed linear speed (m/s)
+        linear_speed = 0.2  # Fixed linear speed (m/s)
         tolerance = 0.05  # Stopping tolerance
 
         while total_distance < goal_x**2 + goal_y**2:
@@ -127,7 +127,7 @@ class MoveDistanceServer(Node):
             goal_handle.publish_feedback(feedback_msg)
             # self.get_logger().info(f"Feedback: current position: x:{self.current_x} | y:{self.current_y}")
             # Print total distance
-            self.get_logger().info(f"Total distance to goal: {total_distance}")
+            # self.get_logger().info(f"Total distance to goal: {total_distance}")
             time.sleep(0.1)   
 
         # Stop the robot after reaching the goal

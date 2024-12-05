@@ -22,7 +22,7 @@ state = [4; 2; 0];  % Initial state
 k = 300;
 
 % Define anchors
-anchors = [2, 0; 7, 1; 5, 4]; % Example positions for 3 anchors
+anchors = [2, 0; 7, 1; 1, 1; 0, 5]; % Example positions for 3 anchors
 n_anchor = size(anchors, 1);
 
 % Calculate distances from the target to each anchor
@@ -33,45 +33,50 @@ distances_noisy = distances + 0.1 * randn(n_anchor, 1);
 
 % Initialize the recursive least squares
 [H,z,C] = trilateration(anchors, distances_noisy, 0.1);
-P = (H'*C^-1*H)^-1;
-x_ls = P*H'*C^-1*z;
+P = (H'*inv(C)*H)^-1;
+% x_ls = P*H'* inv(C) *z;
+x_ls = state(1:2);
 
 
 x_values = zeros(k, 3);
 x_values(1,:) = [x_ls', 0];
 P_values = [P, zeros(2, 1); zeros(1, 3)];
 P_values(3,3) = 0.1;
+P = P_values;
 
 % Initialize the plot
 figure;
 hold on;
-line_handle = plot(NaN, NaN, 'bo-', 'MarkerSize', 5);
+line_handle = plot(NaN, NaN, 'bo-', 'MarkerSize', 5, 'DisplayName', 'Real Trajectory');
 plot(anchors(:,1), anchors(:,2), 'ro', 'MarkerSize', 10, 'DisplayName', 'Anchors');
 line_handle_est = plot(NaN, NaN, 'g+', 'MarkerSize', 10, 'DisplayName', 'Estimated Position');
 title('Real-Time Dynamical System Trajectory');
 xlabel('x');
 ylabel('y');
 grid on;
+legend;
 
 % Real-time update
 x_data = [];
 y_data = [];
 vel = 1;
 omega = 0.4;
+trace_P = zeros(200,1);
+trace_P(1) = trace(P);
+
 for k = 2:200
     % Simulate the system
     state = fun(state(1), state(2), state(3), vel, omega);
 
     % Predict step
-    [x_pred, P_pred] = predict_step([x_values(k-1,1), x_values(k-1,2), x_values(k-1,3), vel, omega], P_values, A, G, Q, fun);
+    [x_pred, P_pred] = predict_step([x_values(k-1,1), x_values(k-1,2), x_values(k-1,3), vel, omega], P, A, G, Q, fun);
 
     % Calculate distances from the target to each anchor
-    distances = sqrt(sum((anchors - state(1:2)').^2, 2)) + 0.1 * randn(n_anchor, 1);
+    distances = sqrt(sum((anchors - state(1:2)').^2, 2)) + 0.1 * randn(n_anchor, 1) ;
     [H,z,C] = trilateration(anchors, distances, 0.1);
 
     % Update step
-    [x_values(k,:), P] = update_step(x_pred, P_pred, z, [H,zeros(2,1)], C);
-    x_values(k,:)
+    [x_values(k,:), P] = update_step(x_pred, P_pred, z, [H,zeros(n_anchor-1,1)], C);
     x_data = [x_data, state(1)];
     y_data = [y_data, state(2)];
 
@@ -80,9 +85,17 @@ for k = 2:200
     set(line_handle, 'XData', x_data, 'YData', y_data);
     drawnow;
     pause(0.1);  
+
+    trace_P(k) = trace(P);
 end
 
 % Plot the results of the estimation
+figure;
+plot(trace_P)
+title('Trace of the covariance matrix');
+xlabel('Time step');
+ylabel('Trace of the covariance matrix');
+
 
 % Predict step function for Kalman filter
 function [x_pred, P_pred] = predict_step(x, P, A, G, Q, fun)
@@ -116,7 +129,9 @@ function [H,z,C] = trilateration(anchors, distances, noise_std)
         % Fill the covariance matrix
         if i == 1
             C(i,i) = 4 * noise_std^2 * (distances(i+1)^2 + distances(i)^2);
-            C(i,i+1) = -4 * noise_std^2 * distances(i+1)^2;
+            if n > 2
+                C(i,i+1) = -4 * noise_std^2 * distances(i+1)^2;
+            end
         elseif i < n-1
             C(i,i-1) = -4 * noise_std^2 * distances(i)^2;
             C(i,i) = 4 * noise_std^2 * (distances(i+1)^2 + distances(i)^2);

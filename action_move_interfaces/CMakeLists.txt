@@ -12,6 +12,7 @@ find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "action/MoveDistance.action"
   "action/Rotate.action"
+  "msg/LimoLocalization.msg"
   )
 
 if(BUILD_TESTING)
