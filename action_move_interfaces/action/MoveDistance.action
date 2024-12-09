@@ -1,11 +1,9 @@
 # Goal
-float32 x    # X-coordinate of the target position
-float32 y    # Y-coordinate of the target position
+float32 target_distance  # Target distance to move
 
 ---
 # Result
-float32 actual_x  # Actual X-coordinate reached
-float32 actual_y  # Actual Y-coordinate reached
+float32 final_distance  # Actual X-coordinate reached
 
 ---
 # Feedback

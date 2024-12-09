@@ -73,7 +73,16 @@ for i = 1:size(N_k,2)
         D_k2(i,j) = norm(N_k2(:,i) - N_k2(:,j))^2;
     end
 end
-D,D_k1,D_k2
+D_k = [[0.         1.75360329 1.76840738]
+[1.75360329 0.         2.124     ]
+[1.76840738 2.124      0.        ]]
+D_k1 = [[0.         5.54755353 5.91269989]
+[5.54755353 0.         2.124     ]
+[5.91269989 2.124      0.        ]]
+D_k2 = [[0.         3.9179726  8.79896687]
+[3.9179726  0.         2.124     ]
+[8.79896687 2.124      0.        ]]
+
 % Compute the Gram matrices for the new matrices
 G_k = -1/2 * H * D_k * H;
 G_k1 = -1/2 * H * D_k1 * H;
@@ -170,7 +179,7 @@ if abs(norm(T-P_k1_new(:,1)) - norm(t_k1)) > 1e-4
     alpha = 1;
     theta = 0;
     T = [0;0];
-    P_k2t = P_k2 + P_k1_new(:,1);
+    P_k2_new = P_k2 + P_k1_new(:,1);
     fun = @(x) norm(P_k1_new(:,2:3) - ([cos(x(1)),-sin(x(1)); sin(x(1)), cos(x(1))] * alpha * S * P_k2(:,2:3) + [x(2);x(3)]), 'fro');
     x0 = [theta; T];
     options = optimoptions('fminunc','Display','iter','Algorithm','quasi-newton');
@@ -180,49 +189,49 @@ if abs(norm(T-P_k1_new(:,1)) - norm(t_k1)) > 1e-4
     norm(T-P_k1_new(:,1));
 end
 
-% % Plot the results
-% figure;
-% hold on;
-% plot(P_k(1,:), P_k(2,:), 'ro', 'MarkerSize', 10, 'DisplayName', 'P_k');
-% plot(P_k1_new(1,:), P_k1_new(2,:), 'bx', 'MarkerSize', 10, 'DisplayName', 'P_{k1 new}');
-% P_k2_new =  R * alpha * S * P_k2 + T;
-% plot(P_k2_new(1,:), P_k2_new(2,:), 'g+', 'MarkerSize', 10, 'DisplayName', 'P_{k2 new}');
-% hold off;
-% axis equal;
-% grid on;
-% legend;
-% xlabel('X Position');
-% ylabel('Y Position');
-% title('Transformed Points P_k, P_{k1 new}, and P_{k2 new}');
+% Plot the results
+figure;
+hold on;
+plot(P_k(1,:), P_k(2,:), 'ro', 'MarkerSize', 10, 'DisplayName', 'P_k');
+plot(P_k1_new(1,:), P_k1_new(2,:), 'bx', 'MarkerSize', 10, 'DisplayName', 'P_{k1 new}');
+P_k2_new =  R * alpha * S * P_k2 + T;
+plot(P_k2_new(1,:), P_k2_new(2,:), 'g+', 'MarkerSize', 10, 'DisplayName', 'P_{k2 new}');
+hold off;
+axis equal;
+grid on;
+legend;
+xlabel('X Position');
+ylabel('Y Position');
+title('Transformed Points P_k, P_{k1 new}, and P_{k2 new}');
 
 % % Mirror the points with respect to the x-axis
-% if norm(P_k2_new(:,1)-P_k1_new(:,1)-t_k1) > 1e-6
-%     u = t_k / norm(t_k);
-%     v = t_k1 / norm(t_k1);
-%     theta = atan2(v(2), v(1)) - atan2(u(2), u(1));
-%     s = sign(theta);
-%     M = [-1,0;0,1];
-% else
-%     M = eye(2);
-% end
+if norm(P_k2_new(:,1)-P_k1_new(:,1)-t_k1) > 1e-6
+    u = t_k / norm(t_k);
+    v = t_k1 / norm(t_k1);
+    theta = atan2(v(2), v(1)) - atan2(u(2), u(1));
+    s = sign(theta);
+    M = [-1,0;0,1];
+else
+    M = eye(2);
+end
 
-% P_k_f = M * P_k;
-% P_k1_f = M * P_k1_new;
-% P_k2_f = M * P_k2_new;
+P_k_f = M * P_k;
+P_k1_f = M * P_k1_new;
+P_k2_f = M * P_k2_new;
 
-% % Plot the mirrored points
-% figure;
-% hold on;
-% plot(P_k_f(1,:), P_k_f(2,:), 'ro', 'MarkerSize', 10, 'DisplayName', 'P_{k f}');
-% plot(P_k1_f(1,:), P_k1_f(2,:), 'bx', 'MarkerSize', 10, 'DisplayName', 'P_{k1 f}');
-% plot(P_k2_f(1,:), P_k2_f(2,:), 'g+', 'MarkerSize', 10, 'DisplayName', 'P_{k2 f}');
-% hold off;
-% axis equal;
-% grid on;
-% legend;
-% xlabel('X Position');
-% ylabel('Y Position');
-% title('Mirrored Points P_{k f}, P_{k1 f}, and P_{k2 f}');
+% Plot the mirrored points
+figure;
+hold on;
+plot(P_k_f(1,:), P_k_f(2,:), 'ro', 'MarkerSize', 10, 'DisplayName', 'P_{k f}');
+plot(P_k1_f(1,:), P_k1_f(2,:), 'bx', 'MarkerSize', 10, 'DisplayName', 'P_{k1 f}');
+plot(P_k2_f(1,:), P_k2_f(2,:), 'g+', 'MarkerSize', 10, 'DisplayName', 'P_{k2 f}');
+hold off;
+axis equal;
+grid on;
+legend;
+xlabel('X Position');
+ylabel('Y Position');
+title('Mirrored Points P_{k f}, P_{k1 f}, and P_{k2 f}');
 
 % % Plot the original points
 % figure;

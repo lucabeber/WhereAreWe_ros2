@@ -1739,27 +1739,26 @@ b_i^2 - b_j^2 - x_i^2 + x_j^2 - y_i^2 + y_j^2 = -2(x_i - x_j)x - 2(y_i - y_j)y +
 <span id="cb6-30"><a href></a><span class="va">C_k</span> <span class="op">=</span> <span class="va">zeros</span>((<span class="va">n_anchor</span><span class="op">-</span><span class="fl">1</span>)<span class="op">*</span><span class="va">k</span>)<span class="op">;</span></span>
 <span id="cb6-31"><a href></a></span>
 <span id="cb6-32"><a href></a><span class="kw">for</span> <span class="va">i</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="va">k</span></span>
-<span id="cb6-33"><a href></a>    <span class="va">j</span> <span class="op">=</span> <span class="fl">2</span><span class="op">*</span><span class="va">i</span> <span class="op">-</span><span class="fl">1</span><span class="op">;</span></span>
-<span id="cb6-34"><a href></a>    <span class="va">l</span> <span class="op">=</span> <span class="fl">1</span> <span class="op">+</span> (<span class="va">i</span><span class="op">-</span><span class="fl">1</span>)<span class="op">*</span>(<span class="va">n_anchor</span> <span class="op">-</span> <span class="fl">1</span>)<span class="op">;</span></span>
-<span id="cb6-35"><a href></a>    <span class="co">% </span><span class="al">TODO</span><span class="co"> = trilateration(...);</span></span>
-<span id="cb6-36"><a href></a><span class="kw">end</span></span>
+<span id="cb6-33"><a href></a>    <span class="va">l</span> <span class="op">=</span> <span class="fl">1</span> <span class="op">+</span> (<span class="va">i</span><span class="op">-</span><span class="fl">1</span>)<span class="op">*</span>(<span class="va">n_anchor</span> <span class="op">-</span> <span class="fl">1</span>)<span class="op">;</span></span>
+<span id="cb6-34"><a href></a>    <span class="co">% </span><span class="al">TODO</span><span class="co"> = trilateration(...);</span></span>
+<span id="cb6-35"><a href></a><span class="kw">end</span></span>
+<span id="cb6-36"><a href></a></span>
 <span id="cb6-37"><a href></a></span>
-<span id="cb6-38"><a href></a></span>
-<span id="cb6-39"><a href></a><span class="va">P_k</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
-<span id="cb6-40"><a href></a><span class="va">x_ls</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
-<span id="cb6-41"><a href></a></span>
-<span id="cb6-42"><a href></a><span class="co">% Plot the estimated position</span></span>
-<span id="cb6-43"><a href></a><span class="va">figure</span><span class="op">;</span></span>
-<span id="cb6-44"><a href></a><span class="va">hold</span> <span class="va">on</span><span class="op">;</span></span>
-<span id="cb6-45"><a href></a><span class="va">plot</span>(<span class="va">anchors</span>(<span class="op">:,</span><span class="fl">1</span>)<span class="op">,</span> <span class="va">anchors</span>(<span class="op">:,</span><span class="fl">2</span>)<span class="op">,</span> <span class="ss">&#39;ro&#39;</span><span class="op">,</span> <span class="ss">&#39;MarkerSize&#39;</span><span class="op">,</span> <span class="fl">10</span><span class="op">,</span> <span class="ss">&#39;DisplayName&#39;</span><span class="op">,</span> <span class="ss">&#39;Anchors&#39;</span>)<span class="op">;</span></span>
-<span id="cb6-46"><a href></a><span class="va">plot</span>(<span class="va">x_ls</span>(<span class="fl">1</span>)<span class="op">,</span> <span class="va">x_ls</span>(<span class="fl">2</span>)<span class="op">,</span> <span class="ss">&#39;g+&#39;</span><span class="op">,</span> <span class="ss">&#39;MarkerSize&#39;</span><span class="op">,</span> <span class="fl">10</span><span class="op">,</span> <span class="ss">&#39;DisplayName&#39;</span><span class="op">,</span> <span class="ss">&#39;Estimated Position&#39;</span>)<span class="op">;</span></span>
-<span id="cb6-47"><a href></a><span class="va">plot</span>(<span class="va">master_true_position</span>(<span class="fl">1</span>)<span class="op">,</span> <span class="va">master_true_position</span>(<span class="fl">2</span>)<span class="op">,</span> <span class="ss">&#39;bx&#39;</span><span class="op">,</span> <span class="ss">&#39;MarkerSize&#39;</span><span class="op">,</span> <span class="fl">10</span><span class="op">,</span> <span class="ss">&#39;DisplayName&#39;</span><span class="op">,</span> <span class="ss">&#39;True Position&#39;</span>)<span class="op">;</span></span>
-<span id="cb6-48"><a href></a><span class="va">legend</span><span class="op">;</span></span>
-<span id="cb6-49"><a href></a><span class="va">xlabel</span>(<span class="ss">&#39;X Position&#39;</span>)<span class="op">;</span></span>
-<span id="cb6-50"><a href></a><span class="va">ylabel</span>(<span class="ss">&#39;Y Position&#39;</span>)<span class="op">;</span></span>
-<span id="cb6-51"><a href></a><span class="va">title</span>(<span class="ss">&#39;2D Localization with Anchors&#39;</span>)<span class="op">;</span></span>
-<span id="cb6-52"><a href></a><span class="va">grid</span> <span class="va">on</span><span class="op">;</span></span>
-<span id="cb6-53"><a href></a><span class="va">hold</span> <span class="va">off</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-38"><a href></a><span class="va">P_k</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb6-39"><a href></a><span class="va">x_ls</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb6-40"><a href></a></span>
+<span id="cb6-41"><a href></a><span class="co">% Plot the estimated position</span></span>
+<span id="cb6-42"><a href></a><span class="va">figure</span><span class="op">;</span></span>
+<span id="cb6-43"><a href></a><span class="va">hold</span> <span class="va">on</span><span class="op">;</span></span>
+<span id="cb6-44"><a href></a><span class="va">plot</span>(<span class="va">anchors</span>(<span class="op">:,</span><span class="fl">1</span>)<span class="op">,</span> <span class="va">anchors</span>(<span class="op">:,</span><span class="fl">2</span>)<span class="op">,</span> <span class="ss">&#39;ro&#39;</span><span class="op">,</span> <span class="ss">&#39;MarkerSize&#39;</span><span class="op">,</span> <span class="fl">10</span><span class="op">,</span> <span class="ss">&#39;DisplayName&#39;</span><span class="op">,</span> <span class="ss">&#39;Anchors&#39;</span>)<span class="op">;</span></span>
+<span id="cb6-45"><a href></a><span class="va">plot</span>(<span class="va">x_ls</span>(<span class="fl">1</span>)<span class="op">,</span> <span class="va">x_ls</span>(<span class="fl">2</span>)<span class="op">,</span> <span class="ss">&#39;g+&#39;</span><span class="op">,</span> <span class="ss">&#39;MarkerSize&#39;</span><span class="op">,</span> <span class="fl">10</span><span class="op">,</span> <span class="ss">&#39;DisplayName&#39;</span><span class="op">,</span> <span class="ss">&#39;Estimated Position&#39;</span>)<span class="op">;</span></span>
+<span id="cb6-46"><a href></a><span class="va">plot</span>(<span class="va">master_true_position</span>(<span class="fl">1</span>)<span class="op">,</span> <span class="va">master_true_position</span>(<span class="fl">2</span>)<span class="op">,</span> <span class="ss">&#39;bx&#39;</span><span class="op">,</span> <span class="ss">&#39;MarkerSize&#39;</span><span class="op">,</span> <span class="fl">10</span><span class="op">,</span> <span class="ss">&#39;DisplayName&#39;</span><span class="op">,</span> <span class="ss">&#39;True Position&#39;</span>)<span class="op">;</span></span>
+<span id="cb6-47"><a href></a><span class="va">legend</span><span class="op">;</span></span>
+<span id="cb6-48"><a href></a><span class="va">xlabel</span>(<span class="ss">&#39;X Position&#39;</span>)<span class="op">;</span></span>
+<span id="cb6-49"><a href></a><span class="va">ylabel</span>(<span class="ss">&#39;Y Position&#39;</span>)<span class="op">;</span></span>
+<span id="cb6-50"><a href></a><span class="va">title</span>(<span class="ss">&#39;2D Localization with Anchors&#39;</span>)<span class="op">;</span></span>
+<span id="cb6-51"><a href></a><span class="va">grid</span> <span class="va">on</span><span class="op">;</span></span>
+<span id="cb6-52"><a href></a><span class="va">hold</span> <span class="va">off</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="recursive-least-squares-algorithm-1" class="slide level2">
 <h2>Recursive Least Squares Algorithm</h2>
@@ -1827,7 +1826,64 @@ b_i^2 - b_j^2 - x_i^2 + x_j^2 - y_i^2 + y_j^2 = -2(x_i - x_j)x - 2(y_i - y_j)y +
 </section>
 <section id="moving-object-with-recursive-least-squares" class="slide level2">
 <h2>Moving object with Recursive Least Squares</h2>
-<p>We will see the effect of the moving target on the estimation of the target position. The system dynamic is given by <span class="math inline">\(\boldsymbol{x}_{k+1} = \boldsymbol{A} \boldsymbol{x}_k\)</span> where <span class="math inline">\(\boldsymbol{A} = \begin{bmatrix} 1 &amp; 0 \\ 0 &amp; 1 \end{bmatrix}\)</span>.</p>
+<p>We will see the effect of the moving target on the estimation of the target position. The system dynamic is given by <span class="math inline">\(\boldsymbol{x}_{k+1} = \boldsymbol{A} \boldsymbol{x}_k\)</span> where <span class="math inline">\(\boldsymbol{A} = \begin{bmatrix} 0 &amp; 1 \\ -1 &amp; 0 \end{bmatrix}\)</span>. Complete the code below where you read <span class="math inline">\(\texttt{TODO}\)</span>.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource matlab number-lines code-with-copy"><code class="sourceCode matlab"><span id="cb9-1"><a href></a><span class="co">% Define the system dynamics</span></span>
+<span id="cb9-2"><a href></a><span class="va">A</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb9-3"><a href></a><span class="va">state</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb9-4"><a href></a><span class="va">dt</span> <span class="op">=</span> <span class="fl">0.1</span><span class="op">;</span>  <span class="co">% Time step</span></span>
+<span id="cb9-5"><a href></a></span>
+<span id="cb9-6"><a href></a><span class="co">% Calculate distances from the target to each anchor</span></span>
+<span id="cb9-7"><a href></a><span class="va">distances</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb9-8"><a href></a></span>
+<span id="cb9-9"><a href></a><span class="co">% Add noise to the distances</span></span>
+<span id="cb9-10"><a href></a><span class="va">distances_noisy</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb9-11"><a href></a></span>
+<span id="cb9-12"><a href></a><span class="co">% Initialize the recursive least squares</span></span>
+<span id="cb9-13"><a href></a>[] <span class="op">=</span> <span class="va">trilateration</span>()<span class="op">;</span></span>
+<span id="cb9-14"><a href></a><span class="va">P</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb9-15"><a href></a><span class="va">x_ls</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb9-16"><a href></a></span>
+<span id="cb9-17"><a href></a><span class="va">x_values</span> <span class="op">=</span> <span class="va">zeros</span>(<span class="va">k</span><span class="op">,</span> <span class="fl">2</span>)<span class="op">;</span></span>
+<span id="cb9-18"><a href></a><span class="va">x_values</span>(<span class="fl">1</span><span class="op">,:</span>) <span class="op">=</span> <span class="va">x_ls</span><span class="op">;</span></span>
+<span id="cb9-19"><a href></a><span class="va">P_values</span> <span class="op">=</span> <span class="va">P</span><span class="op">;</span></span>
+<span id="cb9-20"><a href></a></span>
+<span id="cb9-21"><a href></a><span class="co">% Initialize the plot</span></span>
+<span id="cb9-22"><a href></a><span class="va">figure</span><span class="op">;</span></span>
+<span id="cb9-23"><a href></a><span class="va">hold</span> <span class="va">on</span><span class="op">;</span></span>
+<span id="cb9-24"><a href></a><span class="va">line_handle</span> <span class="op">=</span> <span class="va">plot</span>(<span class="va">NaN</span><span class="op">,</span> <span class="va">NaN</span><span class="op">,</span> <span class="ss">&#39;bo-&#39;</span><span class="op">,</span> <span class="ss">&#39;MarkerSize&#39;</span><span class="op">,</span> <span class="fl">5</span>)<span class="op">;</span></span>
+<span id="cb9-25"><a href></a><span class="va">plot</span>(<span class="va">anchors</span>(<span class="op">:,</span><span class="fl">1</span>)<span class="op">,</span> <span class="va">anchors</span>(<span class="op">:,</span><span class="fl">2</span>)<span class="op">,</span> <span class="ss">&#39;ro&#39;</span><span class="op">,</span> <span class="ss">&#39;MarkerSize&#39;</span><span class="op">,</span> <span class="fl">10</span><span class="op">,</span> <span class="ss">&#39;DisplayName&#39;</span><span class="op">,</span> <span class="ss">&#39;Anchors&#39;</span>)<span class="op">;</span></span>
+<span id="cb9-26"><a href></a><span class="va">line_handle_est</span> <span class="op">=</span> <span class="va">plot</span>(<span class="va">NaN</span><span class="op">,</span> <span class="va">NaN</span><span class="op">,</span> <span class="ss">&#39;g+&#39;</span><span class="op">,</span> <span class="ss">&#39;MarkerSize&#39;</span><span class="op">,</span> <span class="fl">10</span><span class="op">,</span> <span class="ss">&#39;DisplayName&#39;</span><span class="op">,</span> <span class="ss">&#39;Estimated Position&#39;</span>)<span class="op">;</span></span>
+<span id="cb9-27"><a href></a><span class="va">xlim</span>([<span class="op">-</span><span class="fl">2</span><span class="op">,</span> <span class="fl">2</span>])<span class="op">;</span></span>
+<span id="cb9-28"><a href></a><span class="va">ylim</span>([<span class="op">-</span><span class="fl">2</span><span class="op">,</span> <span class="fl">2</span>])<span class="op">;</span></span>
+<span id="cb9-29"><a href></a><span class="va">title</span>(<span class="ss">&#39;Real-Time Dynamical System Trajectory&#39;</span>)<span class="op">;</span></span>
+<span id="cb9-30"><a href></a><span class="va">xlabel</span>(<span class="ss">&#39;x&#39;</span>)<span class="op">;</span></span>
+<span id="cb9-31"><a href></a><span class="va">ylabel</span>(<span class="ss">&#39;y&#39;</span>)<span class="op">;</span></span>
+<span id="cb9-32"><a href></a><span class="va">grid</span> <span class="va">on</span><span class="op">;</span></span>
+<span id="cb9-33"><a href></a><span class="va">hold</span> <span class="va">off</span><span class="op">;</span></span>
+<span id="cb9-34"><a href></a></span>
+<span id="cb9-35"><a href></a><span class="co">% Real-time update</span></span>
+<span id="cb9-36"><a href></a><span class="va">x_data</span> <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb9-37"><a href></a><span class="va">y_data</span> <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb9-38"><a href></a><span class="kw">for</span> <span class="va">k</span> <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">200</span></span>
+<span id="cb9-39"><a href></a>    <span class="co">% Update the state</span></span>
+<span id="cb9-40"><a href></a>    <span class="va">state</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb9-41"><a href></a>    <span class="va">x_data</span> <span class="op">=</span> [<span class="va">x_data</span><span class="op">,</span> <span class="va">state</span>(<span class="fl">1</span>)]<span class="op">;</span></span>
+<span id="cb9-42"><a href></a>    <span class="va">y_data</span> <span class="op">=</span> [<span class="va">y_data</span><span class="op">,</span> <span class="va">state</span>(<span class="fl">2</span>)]<span class="op">;</span></span>
+<span id="cb9-43"><a href></a></span>
+<span id="cb9-44"><a href></a>    <span class="co">% Calculate distances from the target to each anchor</span></span>
+<span id="cb9-45"><a href></a>    <span class="va">distances</span> <span class="op">=</span> <span class="va">sqrt</span>(<span class="va">sum</span>((<span class="va">anchors</span> <span class="op">-</span> <span class="va">state</span><span class="op">&#39;</span>)<span class="op">.^</span><span class="fl">2</span><span class="op">,</span> <span class="fl">2</span>)) <span class="op">+</span> <span class="fl">0.1</span> <span class="op">*</span> <span class="va">randn</span>(<span class="va">n_anchor</span><span class="op">,</span> <span class="fl">1</span>)<span class="op">;</span></span>
+<span id="cb9-46"><a href></a></span>
+<span id="cb9-47"><a href></a>    <span class="co">% Update the recursive least squares</span></span>
+<span id="cb9-48"><a href></a>    [<span class="va">H</span><span class="op">,</span><span class="va">z</span><span class="op">,</span><span class="va">C</span>] <span class="op">=</span> <span class="va">trilateration</span>(<span class="va">anchors</span><span class="op">,</span> <span class="va">distances</span><span class="op">,</span> <span class="fl">0.1</span>)<span class="op">;</span></span>
+<span id="cb9-49"><a href></a>    [<span class="va">x_ls</span><span class="op">,</span> <span class="va">P</span>] <span class="op">=</span> <span class="va">recursive_wls</span>(<span class="va">x_ls</span><span class="op">,</span> <span class="va">P</span><span class="op">,</span> <span class="va">z</span><span class="op">,</span> <span class="va">H</span><span class="op">,</span> <span class="va">C</span>)<span class="op">;</span></span>
+<span id="cb9-50"><a href></a>    <span class="va">x_values</span>(<span class="va">k</span><span class="op">,:</span>) <span class="op">=</span> <span class="va">x_ls</span><span class="op">;</span></span>
+<span id="cb9-51"><a href></a></span>
+<span id="cb9-52"><a href></a>    <span class="co">% Update the plot</span></span>
+<span id="cb9-53"><a href></a>    <span class="va">set</span>(<span class="va">line_handle_est</span><span class="op">,</span> <span class="ss">&#39;XData&#39;</span><span class="op">,</span> <span class="va">x_values</span>(<span class="fl">1</span><span class="op">:</span><span class="va">k</span><span class="op">,</span><span class="fl">1</span>)<span class="op">,</span> <span class="ss">&#39;YData&#39;</span><span class="op">,</span> <span class="va">x_values</span>(<span class="fl">1</span><span class="op">:</span><span class="va">k</span><span class="op">,</span><span class="fl">2</span>))<span class="op">;</span></span>
+<span id="cb9-54"><a href></a>    <span class="va">set</span>(<span class="va">line_handle</span><span class="op">,</span> <span class="ss">&#39;XData&#39;</span><span class="op">,</span> <span class="va">x_data</span><span class="op">,</span> <span class="ss">&#39;YData&#39;</span><span class="op">,</span> <span class="va">y_data</span>)<span class="op">;</span></span>
+<span id="cb9-55"><a href></a>    <span class="va">drawnow</span><span class="op">;</span></span>
+<span id="cb9-56"><a href></a>    <span class="va">pause</span>(<span class="fl">0.05</span>)<span class="op">;</span>  </span>
+<span id="cb9-57"><a href></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section></section>
 <section>
 <section id="dynamic-estimator" class="title-slide slide level1 center">
@@ -1854,7 +1910,7 @@ b_i^2 - b_j^2 - x_i^2 + x_j^2 - y_i^2 + y_j^2 = -2(x_i - x_j)x - 2(y_i - y_j)y +
 <li><span class="math inline">\(v\)</span> the velocity of the target.</li>
 <li><span class="math inline">\(\omega\)</span> the angular velocity of the target.</li>
 </ul>
-<p>The dynamics of the system can be given by:</p>
+<h3 id="system-dynamics">System Dynamics</h3>
 <p><span class="math display">\[
 \begin{aligned}
 \dot{x} &amp;= v \cos(\theta), \\
@@ -1873,7 +1929,10 @@ y_{k+1}=y_k+v_k\sin\theta_k\,\Delta t \\
 \theta_{k+1}=\theta_k+\omega_k\,\Delta t
 \end{cases}
 \]</span></p>
-<p>It is easy to see that the model is nonlinear. For this reason, the Extended Kalman Filter (EKF) is used.</p>
+<p>It is easy to see that the model is nonlinear. For this reason, the Extended Kalman Filter (EKF) is used. The model can be written as</p>
+<p><span class="math display">\[
+\mathbf{x}_{k+1} = f_k(\mathbf{x}_k, \mathbf{u}_k)
+\]</span></p>
 </section>
 <section id="measurement-model" class="slide level2">
 <h2>Measurement Model</h2>
@@ -1895,11 +1954,11 @@ y_{k+1}=y_k+v_k\sin\theta_k\,\Delta t \\
 <p>The prediction step is written as</p>
 <p><span class="math display">\[
 \begin{aligned}
-\hat{\mathbf{x}}_{k+1}^- &amp;= f_k(\hat{\mathbf{x}}, \mathbf{u}_k), \\
+\hat{\mathbf{x}}_{k+1}^- &amp;= f_k(\hat{\mathbf{x}}_k, \mathbf{u}_k,\mathbf{v}_k), \\
 \mathbf{P}_{k+1}^- &amp;= \mathbf{A}_k \mathbf{P}_k \mathbf{A}_k^T + \mathbf{G} \mathbf{Q}_k \mathbf{G}^T,
 \end{aligned}
 \]</span></p>
-<p>where <span class="math inline">\(\mathbf{A}_k\)</span> is the Jacobian of the model, <span class="math inline">\(\mathbf{G}\)</span> is the Jacobian of the noise, and <span class="math inline">\(\mathbf{Q}_k\)</span> is the covariance matrix of the noise. The Jacobians are given by</p>
+<p>where <span class="math inline">\(\mathbf{A}_k\)</span> is the Jacobian of the model, <span class="math inline">\(\mathbf{G}\)</span> is the Jacobian of the noise, and <span class="math inline">\(\mathbf{Q}_k\)</span> is the covariance matrix of the model noise. The Jacobians are given by</p>
 <p><span class="math display">\[
 \begin{aligned}
 \mathbf{A}_k &amp;= \frac{f_k(\mathbf{x},\mathbf{u},\mathbf{v})}{d\mathbf{x}}, \\
@@ -1924,6 +1983,134 @@ y_{k+1}=y_k+v_k\sin\theta_k\,\Delta t \\
 \mathbf{H}_{k+1} = \frac{h_{k+1}(\mathbf{x})}{d\mathbf{x}},
 \]</span></p>
 <p>computed for <span class="math inline">\(\mathbf{x} = \hat{\mathbf{x}}_{k+1}^-\)</span> and <span class="math inline">\(\boldsymbol{\varepsilon} = \boldsymbol{0}\)</span>.</p>
+</section></section>
+<section>
+<section id="matlab-implementation-2" class="title-slide slide level1 center">
+<h1>Matlab Implementation</h1>
+
+</section>
+<section id="extended-kalman-filter-functions" class="slide level2">
+<h2>Extended Kalman Filter Functions</h2>
+<p>We will implement the Extended Kalman Filter for the unicycle model. In this first part of the code the prediction and update functions have to be written. Remember that the system model is not linear while the measurement model is linear. Complete the code below where you read <span class="math inline">\(\texttt{TODO}\)</span>.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource matlab number-lines code-with-copy"><code class="sourceCode matlab"><span id="cb10-1"><a href></a><span class="co">% Predict step function for Kalman filter</span></span>
+<span id="cb10-2"><a href></a><span class="kw">function</span> [<span class="va">x_pred</span><span class="op">,</span> <span class="va">P_pred</span>] <span class="op">=</span> <span class="va">predict_step</span>(<span class="va">x</span><span class="op">,</span> <span class="va">P</span><span class="op">,</span> <span class="va">A</span><span class="op">,</span> <span class="va">G</span><span class="op">,</span> <span class="va">Q</span><span class="op">,</span> <span class="va">fun</span>)</span>
+<span id="cb10-3"><a href></a>    <span class="va">x_pred</span> <span class="op">=</span> <span class="va">fun</span>(<span class="va">x</span>(<span class="fl">1</span>)<span class="op">,</span> <span class="va">x</span>(<span class="fl">2</span>)<span class="op">,</span> <span class="va">x</span>(<span class="fl">3</span>)<span class="op">,</span> <span class="va">x</span>(<span class="fl">4</span>)<span class="op">,</span> <span class="va">x</span>(<span class="fl">5</span>))<span class="op">;</span> <span class="co">% Assuming x contains [x, y, theta, vel, omega]</span></span>
+<span id="cb10-4"><a href></a>    <span class="va">A_c</span> <span class="op">=</span> <span class="va">A</span>(<span class="va">x</span>(<span class="fl">1</span>)<span class="op">,</span> <span class="va">x</span>(<span class="fl">2</span>)<span class="op">,</span> <span class="va">x</span>(<span class="fl">3</span>)<span class="op">,</span> <span class="va">x</span>(<span class="fl">4</span>)<span class="op">,</span> <span class="va">x</span>(<span class="fl">5</span>))<span class="op">;</span></span>
+<span id="cb10-5"><a href></a>    <span class="va">P_pred</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb10-6"><a href></a><span class="kw">end</span></span>
+<span id="cb10-7"><a href></a></span>
+<span id="cb10-8"><a href></a><span class="co">% Update step function for Kalman filter</span></span>
+<span id="cb10-9"><a href></a><span class="kw">function</span> [<span class="va">x_k_1</span><span class="op">,</span> <span class="va">P_k_1</span>] <span class="op">=</span> <span class="va">update_step</span>(<span class="va">x_k</span><span class="op">,</span> <span class="va">P_k</span><span class="op">,</span> <span class="va">z_k_1</span><span class="op">,</span> <span class="va">H_k_1</span><span class="op">,</span> <span class="va">C_new</span>)</span>
+<span id="cb10-10"><a href></a>    <span class="va">K</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb10-11"><a href></a>    <span class="va">x_k_1</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb10-12"><a href></a>    <span class="va">P_k_1</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb10-13"><a href></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="system-fuction-and-jacobians" class="slide level2">
+<h2>System Fuction and Jacobians</h2>
+<p>Now we will implement the system function and the Jacobians. Complete the code below where you read <span class="math inline">\(\texttt{TODO}\)</span>.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource matlab number-lines code-with-copy"><code class="sourceCode matlab"><span id="cb11-1"><a href></a><span class="va">clc</span> </span>
+<span id="cb11-2"><a href></a><span class="va">clear</span> <span class="va">all</span></span>
+<span id="cb11-3"><a href></a><span class="va">close</span> <span class="va">all</span></span>
+<span id="cb11-4"><a href></a></span>
+<span id="cb11-5"><a href></a><span class="va">dT</span> <span class="op">=</span> <span class="fl">1</span><span class="op">/</span><span class="fl">30</span><span class="op">;</span></span>
+<span id="cb11-6"><a href></a></span>
+<span id="cb11-7"><a href></a><span class="co">% Define the system dynamics</span></span>
+<span id="cb11-8"><a href></a><span class="va">fun</span> <span class="op">=</span> <span class="op">@</span>(<span class="va">x</span><span class="op">,</span> <span class="va">y</span><span class="op">,</span> <span class="va">theta</span><span class="op">,</span> <span class="va">vel</span><span class="op">,</span> <span class="va">omega</span>) <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb11-9"><a href></a></span>
+<span id="cb11-10"><a href></a><span class="co">% Define the system matrix</span></span>
+<span id="cb11-11"><a href></a><span class="va">A</span> <span class="op">=</span> <span class="op">@</span>(<span class="va">x</span><span class="op">,</span> <span class="va">y</span><span class="op">,</span> <span class="va">theta</span><span class="op">,</span> <span class="va">vel</span><span class="op">,</span> <span class="va">omega</span>) <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb11-12"><a href></a></span>
+<span id="cb11-13"><a href></a><span class="va">G</span> <span class="op">=</span> <span class="va">zeros</span>(<span class="fl">3</span><span class="op">,</span> <span class="fl">3</span>)<span class="op">;</span></span>
+<span id="cb11-14"><a href></a></span>
+<span id="cb11-15"><a href></a><span class="va">nu</span> <span class="op">=</span> [<span class="fl">0</span><span class="op">;</span><span class="fl">0</span><span class="op">;</span><span class="fl">0</span>]<span class="op">;</span></span>
+<span id="cb11-16"><a href></a></span>
+<span id="cb11-17"><a href></a><span class="va">Q</span> <span class="op">=</span> <span class="fl">0.1</span> <span class="op">*</span> <span class="va">eye</span>(<span class="fl">3</span>)<span class="op">;</span></span>
+<span id="cb11-18"><a href></a></span>
+<span id="cb11-19"><a href></a><span class="co">% Define the initial state</span></span>
+<span id="cb11-20"><a href></a><span class="va">state</span> <span class="op">=</span> [<span class="fl">4</span><span class="op">;</span> <span class="fl">2</span><span class="op">;</span> <span class="fl">0</span>]<span class="op">;</span>  <span class="co">% Initial state</span></span>
+<span id="cb11-21"><a href></a></span>
+<span id="cb11-22"><a href></a><span class="va">k</span> <span class="op">=</span> <span class="fl">300</span><span class="op">;</span></span>
+<span id="cb11-23"><a href></a></span>
+<span id="cb11-24"><a href></a><span class="co">% Define anchors</span></span>
+<span id="cb11-25"><a href></a><span class="va">anchors</span> <span class="op">=</span> [<span class="fl">2</span><span class="op">,</span> <span class="fl">0</span><span class="op">;</span> <span class="fl">7</span><span class="op">,</span> <span class="fl">1</span><span class="op">;</span> <span class="fl">1</span><span class="op">,</span> <span class="fl">1</span><span class="op">;</span> <span class="fl">0</span><span class="op">,</span> <span class="fl">5</span>]<span class="op">;</span> <span class="co">% Example positions for 3 anchors</span></span>
+<span id="cb11-26"><a href></a><span class="va">n_anchor</span> <span class="op">=</span> <span class="va">size</span>(<span class="va">anchors</span><span class="op">,</span> <span class="fl">1</span>)<span class="op">;</span></span>
+<span id="cb11-27"><a href></a></span>
+<span id="cb11-28"><a href></a><span class="co">% Calculate distances from the target to each anchor</span></span>
+<span id="cb11-29"><a href></a><span class="va">distances</span> <span class="op">=</span> <span class="va">sqrt</span>(<span class="va">sum</span>((<span class="va">anchors</span> <span class="op">-</span> <span class="va">state</span>(<span class="fl">1</span><span class="op">:</span><span class="fl">2</span>)<span class="op">&#39;</span>)<span class="op">.^</span><span class="fl">2</span><span class="op">,</span> <span class="fl">2</span>))<span class="op">;</span></span>
+<span id="cb11-30"><a href></a></span>
+<span id="cb11-31"><a href></a><span class="co">% Add noise to the distances</span></span>
+<span id="cb11-32"><a href></a><span class="va">distances_noisy</span> <span class="op">=</span> <span class="va">distances</span> <span class="op">+</span> <span class="fl">0.1</span> <span class="op">*</span> <span class="va">randn</span>(<span class="va">n_anchor</span><span class="op">,</span> <span class="fl">1</span>)<span class="op">;</span></span>
+<span id="cb11-33"><a href></a></span>
+<span id="cb11-34"><a href></a><span class="co">% Initialize the first position which will be used to initialize the EKF</span></span>
+<span id="cb11-35"><a href></a>[<span class="va">H</span><span class="op">,</span><span class="va">z</span><span class="op">,</span><span class="va">C</span>] <span class="op">=</span> <span class="va">trilateration</span>(<span class="va">anchors</span><span class="op">,</span> <span class="va">distances_noisy</span><span class="op">,</span> <span class="fl">0.1</span>)<span class="op">;</span></span>
+<span id="cb11-36"><a href></a><span class="va">P</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb11-37"><a href></a><span class="va">x_ls</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="initialization-of-the-extended-kalman-filter" class="slide level2">
+<h2>Initialization of the Extended Kalman Filter</h2>
+<p>Here we initialize the covariance matrix P, the plot and the variables to store the estimated positions.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource matlab number-lines code-with-copy"><code class="sourceCode matlab"><span id="cb12-1"><a href></a><span class="va">x_values</span> <span class="op">=</span> <span class="va">zeros</span>(<span class="va">k</span><span class="op">,</span> <span class="fl">3</span>)<span class="op">;</span></span>
+<span id="cb12-2"><a href></a><span class="va">x_values</span>(<span class="fl">1</span><span class="op">,:</span>) <span class="op">=</span> [<span class="va">x_ls</span><span class="op">&#39;,</span> <span class="fl">0</span>]<span class="op">;</span></span>
+<span id="cb12-3"><a href></a><span class="va">P_values</span> <span class="op">=</span> [<span class="va">P</span><span class="op">,</span> <span class="va">zeros</span>(<span class="fl">2</span><span class="op">,</span> <span class="fl">1</span>)<span class="op">;</span> <span class="va">zeros</span>(<span class="fl">1</span><span class="op">,</span> <span class="fl">3</span>)]<span class="op">;</span></span>
+<span id="cb12-4"><a href></a><span class="va">P_values</span>(<span class="fl">3</span><span class="op">,</span><span class="fl">3</span>) <span class="op">=</span> <span class="fl">0.1</span><span class="op">;</span></span>
+<span id="cb12-5"><a href></a><span class="va">P</span> <span class="op">=</span> <span class="va">P_values</span><span class="op">;</span></span>
+<span id="cb12-6"><a href></a></span>
+<span id="cb12-7"><a href></a><span class="co">% Initialize the plot</span></span>
+<span id="cb12-8"><a href></a><span class="va">figure</span><span class="op">;</span></span>
+<span id="cb12-9"><a href></a><span class="va">hold</span> <span class="va">on</span><span class="op">;</span></span>
+<span id="cb12-10"><a href></a><span class="va">line_handle</span> <span class="op">=</span> <span class="va">plot</span>(<span class="va">NaN</span><span class="op">,</span> <span class="va">NaN</span><span class="op">,</span> <span class="ss">&#39;bo-&#39;</span><span class="op">,</span> <span class="ss">&#39;MarkerSize&#39;</span><span class="op">,</span> <span class="fl">5</span><span class="op">,</span> <span class="ss">&#39;DisplayName&#39;</span><span class="op">,</span> <span class="ss">&#39;Real Trajectory&#39;</span>)<span class="op">;</span></span>
+<span id="cb12-11"><a href></a><span class="va">plot</span>(<span class="va">anchors</span>(<span class="op">:,</span><span class="fl">1</span>)<span class="op">,</span> <span class="va">anchors</span>(<span class="op">:,</span><span class="fl">2</span>)<span class="op">,</span> <span class="ss">&#39;ro&#39;</span><span class="op">,</span> <span class="ss">&#39;MarkerSize&#39;</span><span class="op">,</span> <span class="fl">10</span><span class="op">,</span> <span class="ss">&#39;DisplayName&#39;</span><span class="op">,</span> <span class="ss">&#39;Anchors&#39;</span>)<span class="op">;</span></span>
+<span id="cb12-12"><a href></a><span class="va">line_handle_est</span> <span class="op">=</span> <span class="va">plot</span>(<span class="va">NaN</span><span class="op">,</span> <span class="va">NaN</span><span class="op">,</span> <span class="ss">&#39;g+&#39;</span><span class="op">,</span> <span class="ss">&#39;MarkerSize&#39;</span><span class="op">,</span> <span class="fl">10</span><span class="op">,</span> <span class="ss">&#39;DisplayName&#39;</span><span class="op">,</span> <span class="ss">&#39;Estimated Position&#39;</span>)<span class="op">;</span></span>
+<span id="cb12-13"><a href></a><span class="va">title</span>(<span class="ss">&#39;Real-Time Dynamical System Trajectory&#39;</span>)<span class="op">;</span></span>
+<span id="cb12-14"><a href></a><span class="va">xlabel</span>(<span class="ss">&#39;x&#39;</span>)<span class="op">;</span></span>
+<span id="cb12-15"><a href></a><span class="va">ylabel</span>(<span class="ss">&#39;y&#39;</span>)<span class="op">;</span></span>
+<span id="cb12-16"><a href></a><span class="va">grid</span> <span class="va">on</span><span class="op">;</span></span>
+<span id="cb12-17"><a href></a><span class="va">legend</span><span class="op">;</span></span>
+<span id="cb12-18"><a href></a></span>
+<span id="cb12-19"><a href></a><span class="co">% Real-time update</span></span>
+<span id="cb12-20"><a href></a><span class="va">x_data</span> <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb12-21"><a href></a><span class="va">y_data</span> <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb12-22"><a href></a><span class="va">vel</span> <span class="op">=</span> <span class="fl">1</span><span class="op">;</span></span>
+<span id="cb12-23"><a href></a><span class="va">omega</span> <span class="op">=</span> <span class="fl">0.4</span><span class="op">;</span></span>
+<span id="cb12-24"><a href></a><span class="va">trace_P</span> <span class="op">=</span> <span class="va">zeros</span>(<span class="fl">200</span><span class="op">,</span><span class="fl">1</span>)<span class="op">;</span></span>
+<span id="cb12-25"><a href></a><span class="va">trace_P</span>(<span class="fl">1</span>) <span class="op">=</span> <span class="va">trace</span>(<span class="va">P</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="real-time-update-of-the-extended-kalman-filter" class="slide level2">
+<h2>Real-Time Update of the Extended Kalman Filter</h2>
+<p>In this part of the code we will update the Extended Kalman Filter in real-time inside a loop. Note that looking at the trace of the covariance matrix is a good way to see how the estimation is behaving. Complete the code below where you read <span class="math inline">\(\texttt{TODO}\)</span>.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource matlab number-lines code-with-copy"><code class="sourceCode matlab"><span id="cb13-1"><a href></a><span class="kw">for</span> <span class="va">k</span> <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">200</span></span>
+<span id="cb13-2"><a href></a>    <span class="co">% Simulate the system</span></span>
+<span id="cb13-3"><a href></a>    <span class="va">state</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb13-4"><a href></a></span>
+<span id="cb13-5"><a href></a>    <span class="co">% Predict step</span></span>
+<span id="cb13-6"><a href></a>    [<span class="va">x_pred</span><span class="op">,</span> <span class="va">P_pred</span>] <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb13-7"><a href></a></span>
+<span id="cb13-8"><a href></a>    <span class="co">% Calculate distances from the target to each anchor</span></span>
+<span id="cb13-9"><a href></a>    <span class="va">distances</span> <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb13-10"><a href></a>    [<span class="va">H</span><span class="op">,</span><span class="va">z</span><span class="op">,</span><span class="va">C</span>] <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb13-11"><a href></a></span>
+<span id="cb13-12"><a href></a>    <span class="co">% Update step</span></span>
+<span id="cb13-13"><a href></a>    [<span class="va">x_values</span>(<span class="va">k</span><span class="op">,:</span>)<span class="op">,</span> <span class="va">P</span>] <span class="op">=</span> <span class="co">% </span><span class="al">TODO</span></span>
+<span id="cb13-14"><a href></a>    <span class="va">x_data</span> <span class="op">=</span> [<span class="va">x_data</span><span class="op">,</span> <span class="va">state</span>(<span class="fl">1</span>)]<span class="op">;</span></span>
+<span id="cb13-15"><a href></a>    <span class="va">y_data</span> <span class="op">=</span> [<span class="va">y_data</span><span class="op">,</span> <span class="va">state</span>(<span class="fl">2</span>)]<span class="op">;</span></span>
+<span id="cb13-16"><a href></a></span>
+<span id="cb13-17"><a href></a>    <span class="co">% Update the plot</span></span>
+<span id="cb13-18"><a href></a>    <span class="va">set</span>(<span class="va">line_handle_est</span><span class="op">,</span> <span class="ss">&#39;XData&#39;</span><span class="op">,</span> <span class="va">x_values</span>(<span class="fl">1</span><span class="op">:</span><span class="va">k</span><span class="op">,</span><span class="fl">1</span>)<span class="op">,</span> <span class="ss">&#39;YData&#39;</span><span class="op">,</span> <span class="va">x_values</span>(<span class="fl">1</span><span class="op">:</span><span class="va">k</span><span class="op">,</span><span class="fl">2</span>))<span class="op">;</span></span>
+<span id="cb13-19"><a href></a>    <span class="va">set</span>(<span class="va">line_handle</span><span class="op">,</span> <span class="ss">&#39;XData&#39;</span><span class="op">,</span> <span class="va">x_data</span><span class="op">,</span> <span class="ss">&#39;YData&#39;</span><span class="op">,</span> <span class="va">y_data</span>)<span class="op">;</span></span>
+<span id="cb13-20"><a href></a>    <span class="va">drawnow</span><span class="op">;</span></span>
+<span id="cb13-21"><a href></a>    <span class="va">pause</span>(<span class="fl">0.1</span>)<span class="op">;</span>  </span>
+<span id="cb13-22"><a href></a></span>
+<span id="cb13-23"><a href></a>    <span class="co">% Store the trace of the covariance matrix</span></span>
+<span id="cb13-24"><a href></a>    <span class="va">trace_P</span>(<span class="va">k</span>) <span class="op">=</span> <span class="va">trace</span>(<span class="va">P</span>)<span class="op">;</span></span>
+<span id="cb13-25"><a href></a><span class="kw">end</span></span>
+<span id="cb13-26"><a href></a></span>
+<span id="cb13-27"><a href></a><span class="co">% Plot the results of the estimation</span></span>
+<span id="cb13-28"><a href></a><span class="va">figure</span><span class="op">;</span></span>
+<span id="cb13-29"><a href></a><span class="va">plot</span>(<span class="va">trace_P</span>)</span>
+<span id="cb13-30"><a href></a><span class="va">title</span>(<span class="ss">&#39;Trace of the covariance matrix&#39;</span>)<span class="op">;</span></span>
+<span id="cb13-31"><a href></a><span class="va">xlabel</span>(<span class="ss">&#39;Time step&#39;</span>)<span class="op">;</span></span>
+<span id="cb13-32"><a href></a><span class="va">ylabel</span>(<span class="ss">&#39;Trace of the covariance matrix&#39;</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="quarto-auto-generated-content">
 <div class="footer footer-default">
 

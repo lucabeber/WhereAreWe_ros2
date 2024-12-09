@@ -104,7 +104,7 @@ function [x_pred, P_pred] = predict_step(x, P, A, G, Q, fun)
     P_pred = A_c * P * A_c' + G * Q * G';
 end
 
-% Iterative solution for the recursive least squares
+% Update step function for Kalman filter
 function [x_k_1, P_k_1] = update_step(x_k, P_k, z_k_1, H_k_1, C_new)
     K = P_k * H_k_1' * (H_k_1 * P_k * H_k_1' + C_new)^-1;
     x_k_1 = x_k + K * (z_k_1 - H_k_1 * x_k);

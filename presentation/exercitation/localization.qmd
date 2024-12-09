@@ -584,7 +584,6 @@ Z_k = zeros((n_anchor-1)*k, 1);
 C_k = zeros((n_anchor-1)*k);
 
 for i = 1:k
-    j = 2*i -1;
     l = 1 + (i-1)*(n_anchor - 1);
     % TODO = trilateration(...);
 end
@@ -758,7 +757,7 @@ The control variable of the system are:
 - $v$ the velocity of the target.
 - $\omega$ the angular velocity of the target.
 
-The dynamics of the system can be given by:
+### System Dynamics
 
 $$
 \begin{aligned}
@@ -780,7 +779,11 @@ y_{k+1}=y_k+v_k\sin\theta_k\,\Delta t \\
 \end{cases}
 $$
 
-It is easy to see that the model is nonlinear. For this reason, the Extended Kalman Filter (EKF) is used.
+It is easy to see that the model is nonlinear. For this reason, the Extended Kalman Filter (EKF) is used. The model can be written as
+
+$$
+\mathbf{x}_{k+1} = f_k(\mathbf{x}_k, \mathbf{u}_k)
+$$
 
 ## Measurement Model
 As in the previous cases, the measurements are the distances from the target to the anchors. The model to estimate the current $x$ and $y$ is the same linearized model as before. It is possible to use it without any modification,
@@ -803,12 +806,12 @@ The prediction step is written as
 
 $$
 \begin{aligned}
-\hat{\mathbf{x}}_{k+1}^- &= f_k(\hat{\mathbf{x}}, \mathbf{u}_k), \\
+\hat{\mathbf{x}}_{k+1}^- &= f_k(\hat{\mathbf{x}}_k, \mathbf{u}_k,\mathbf{v}_k), \\
 \mathbf{P}_{k+1}^- &= \mathbf{A}_k \mathbf{P}_k \mathbf{A}_k^T + \mathbf{G} \mathbf{Q}_k \mathbf{G}^T,
 \end{aligned}
 $$
 
-where $\mathbf{A}_k$ is the Jacobian of the model, $\mathbf{G}$ is the Jacobian of the noise, and $\mathbf{Q}_k$ is the covariance matrix of the noise. The Jacobians are given by
+where $\mathbf{A}_k$ is the Jacobian of the model, $\mathbf{G}$ is the Jacobian of the noise, and $\mathbf{Q}_k$ is the covariance matrix of the model noise. The Jacobians are given by
 
 $$
 \begin{aligned}
@@ -839,3 +842,137 @@ $$
 
 computed for $\mathbf{x} = \hat{\mathbf{x}}_{k+1}^-$ and $\boldsymbol{\varepsilon} = \boldsymbol{0}$.
 
+
+# Matlab Implementation
+
+## Extended Kalman Filter Functions
+We will implement the Extended Kalman Filter for the unicycle model. In this first part of the code the prediction and update functions have to be written. Remember that the system model is not linear while the measurement model is linear. Complete the code below where you read $\texttt{TODO}$.
+
+```matlab{.matlab}
+% Predict step function for Kalman filter
+function [x_pred, P_pred] = predict_step(x, P, A, G, Q, fun)
+    x_pred = fun(x(1), x(2), x(3), x(4), x(5)); % Assuming x contains [x, y, theta, vel, omega]
+    A_c = A(x(1), x(2), x(3), x(4), x(5));
+    P_pred = % TODO
+end
+
+% Update step function for Kalman filter
+function [x_k_1, P_k_1] = update_step(x_k, P_k, z_k_1, H_k_1, C_new)
+    K = % TODO
+    x_k_1 = % TODO
+    P_k_1 = % TODO
+end
+```
+
+## System Fuction and Jacobians
+
+Now we will implement the system function and the Jacobians. Complete the code below where you read $\texttt{TODO}$.
+
+```matlab{.matlab}
+clc 
+clear all
+close all
+
+dT = 1/30;
+
+% Define the system dynamics
+fun = @(x, y, theta, vel, omega) % TODO
+
+% Define the system matrix
+A = @(x, y, theta, vel, omega) % TODO
+
+G = zeros(3, 3);
+
+nu = [0;0;0];
+
+Q = 0.1 * eye(3);
+
+% Define the initial state
+state = [4; 2; 0];  % Initial state
+
+k = 300;
+
+% Define anchors
+anchors = [2, 0; 7, 1; 1, 1; 0, 5]; % Example positions for 3 anchors
+n_anchor = size(anchors, 1);
+
+% Calculate distances from the target to each anchor
+distances = sqrt(sum((anchors - state(1:2)').^2, 2));
+
+% Add noise to the distances
+distances_noisy = distances + 0.1 * randn(n_anchor, 1);
+
+% Initialize the first position which will be used to initialize the EKF
+[H,z,C] = trilateration(anchors, distances_noisy, 0.1);
+P = % TODO
+x_ls = % TODO
+```
+
+## Initialization of the Extended Kalman Filter
+Here we initialize the covariance matrix P, the plot and the variables to store the estimated positions. 
+
+```matlab{.matlab}
+x_values = zeros(k, 3);
+x_values(1,:) = [x_ls', 0];
+P_values = [P, zeros(2, 1); zeros(1, 3)];
+P_values(3,3) = 0.1;
+P = P_values;
+
+% Initialize the plot
+figure;
+hold on;
+line_handle = plot(NaN, NaN, 'bo-', 'MarkerSize', 5, 'DisplayName', 'Real Trajectory');
+plot(anchors(:,1), anchors(:,2), 'ro', 'MarkerSize', 10, 'DisplayName', 'Anchors');
+line_handle_est = plot(NaN, NaN, 'g+', 'MarkerSize', 10, 'DisplayName', 'Estimated Position');
+title('Real-Time Dynamical System Trajectory');
+xlabel('x');
+ylabel('y');
+grid on;
+legend;
+
+% Real-time update
+x_data = [];
+y_data = [];
+vel = 1;
+omega = 0.4;
+trace_P = zeros(200,1);
+trace_P(1) = trace(P);
+```
+
+## Real-Time Update of the Extended Kalman Filter
+In this part of the code we will update the Extended Kalman Filter in real-time inside a loop. Note that looking at the trace of the covariance matrix is a good way to see how the estimation is behaving. Complete the code below where you read $\texttt{TODO}$.
+
+```matlab{.matlab}
+for k = 2:200
+    % Simulate the system
+    state = % TODO
+
+    % Predict step
+    [x_pred, P_pred] = % TODO
+
+    % Calculate distances from the target to each anchor
+    distances = % TODO
+    [H,z,C] = % TODO
+
+    % Update step
+    [x_values(k,:), P] = % TODO
+    x_data = [x_data, state(1)];
+    y_data = [y_data, state(2)];
+
+    % Update the plot
+    set(line_handle_est, 'XData', x_values(1:k,1), 'YData', x_values(1:k,2));
+    set(line_handle, 'XData', x_data, 'YData', y_data);
+    drawnow;
+    pause(0.1);  
+
+    % Store the trace of the covariance matrix
+    trace_P(k) = trace(P);
+end
+
+% Plot the results of the estimation
+figure;
+plot(trace_P)
+title('Trace of the covariance matrix');
+xlabel('Time step');
+ylabel('Trace of the covariance matrix');
+```
