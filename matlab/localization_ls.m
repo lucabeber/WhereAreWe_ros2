@@ -54,7 +54,7 @@ title('2D Localization with Anchors');
 grid on;
 hold off;
 
-%% Recursive Least Squares
+%% 
 % New measurements
 distances_noisy_2 = distances + 0.1 * randn(n_anchor, 1);
 
@@ -65,6 +65,7 @@ H_new = [H_k; H];
 C_new = [C_k, zeros(size(C_k,1), size(C,2)); zeros(size(C,1), size(C_k,2)), C];
 x_new = recursive_wls(x_ls, P_k, Z_new, H_new, C_new);
 
+%% Recursive Least Squares
 % Now we simulate the recursive least squares from the first measurement
 % Initialize the noisy distances
 distances_noisy = zeros(k, n_anchor);

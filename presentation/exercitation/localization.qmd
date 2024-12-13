@@ -632,7 +632,7 @@ distances_noisy_2 = distances + 0.1 * randn(n_anchor, 1);
 Z_new = % TODO
 H_new = % TODO
 C_new = % TODO
-x_new = recursive_wls();
+x_ls_new = % TODO use the least squares algorithm to find the new position
 
 % Now we simulate the recursive least squares from the first measurement
 % Initialize the noisy distances
